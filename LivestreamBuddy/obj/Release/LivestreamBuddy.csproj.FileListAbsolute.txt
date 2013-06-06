@@ -1,0 +1,9 @@
+C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\LivestreamBuddy\bin\Release\LivestreamBuddy.exe.config
+C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\LivestreamBuddy\bin\Release\LivestreamBuddy.exe
+C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\LivestreamBuddy\bin\Release\LivestreamBuddy.pdb
+C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\LivestreamBuddy\obj\Release\LivestreamBuddy.Form1.resources
+C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\LivestreamBuddy\obj\Release\LivestreamBuddy.frmGiveaway.resources
+C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\LivestreamBuddy\obj\Release\LivestreamBuddy.Properties.Resources.resources
+C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\LivestreamBuddy\obj\Release\LivestreamBuddy.csproj.GenerateResource.Cache
+C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\LivestreamBuddy\obj\Release\LivestreamBuddy.exe
+C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\LivestreamBuddy\obj\Release\LivestreamBuddy.pdb
