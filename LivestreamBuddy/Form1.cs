@@ -60,6 +60,14 @@ namespace LivestreamBuddy
             txtMessages.ScrollToCaret();
         }
 
+        private void reportWorkerProgressForViewerList(IrcClient client, string channelName)
+        {
+            Channel channel = client.GetChannel(channelName);
+            IDictionaryEnumerator userEnum = channel.Users.GetEnumerator();
+
+            worker.ReportProgress(0, new ProgressReport(ProgressReportType.GetViewers, userEnum));
+        }
+
         # region Events
 
         private void btnConnect_Click(object sender, EventArgs e)
@@ -127,6 +135,7 @@ namespace LivestreamBuddy
 
             client.OnError += client_OnError;
             client.OnChannelMessage += client_OnChannelMessage;
+            client.OnChannelActiveSynced += client_OnChannelActiveSynced;
             client.OnJoin += client_OnJoin;
             client.OnAway += client_OnAway;
             client.OnQuit += client_OnQuit;
@@ -228,6 +237,8 @@ namespace LivestreamBuddy
                         lstViewers.Items.Add(viewer.Nick);
                     }
 
+                    lblViewerCount.Text = "Viewer Count: " + lstViewers.Items.Count;
+
                     break;
             }
         }
@@ -238,6 +249,7 @@ namespace LivestreamBuddy
             btnConnect.Enabled = true;
             btnConnect.Text = "Connect";
 
+            lblViewerCount.Text = "Viewer Count:";
             lstViewers.Items.Clear();
         }
 
@@ -248,11 +260,13 @@ namespace LivestreamBuddy
 
             if (e.Data.Message.ToLower() == "bobtart")
             {
-                IrcClient client = sender as IrcClient;
+                reportWorkerProgressForViewerList(sender as IrcClient, e.Data.Channel);
+
+                /*IrcClient client = sender as IrcClient;
                 Channel channel = client.GetChannel(e.Data.Channel);
                 IDictionaryEnumerator userEnum = channel.Users.GetEnumerator();
 
-                worker.ReportProgress(0, new ProgressReport(ProgressReportType.GetViewers, userEnum));
+                worker.ReportProgress(0, new ProgressReport(ProgressReportType.GetViewers, userEnum));*/
             }
         }
 
@@ -261,31 +275,24 @@ namespace LivestreamBuddy
             worker.ReportProgress(0, new ProgressReport(ProgressReportType.Error, e.ErrorMessage));
         }
 
+        void client_OnChannelActiveSynced(object sender, IrcEventArgs e)
+        {
+            reportWorkerProgressForViewerList(sender as IrcClient, e.Data.Channel);
+        }
+
         void client_OnJoin(object sender, JoinEventArgs e)
         {
-            IrcClient client = sender as IrcClient;
-            Channel channel = client.GetChannel(e.Channel);
-            IDictionaryEnumerator userEnum = channel.Users.GetEnumerator();
-
-            worker.ReportProgress(0, new ProgressReport(ProgressReportType.GetViewers, userEnum));
+            reportWorkerProgressForViewerList(sender as IrcClient, e.Channel);
         }
 
         void client_OnAway(object sender, AwayEventArgs e)
         {
-            IrcClient client = sender as IrcClient;
-            Channel channel = client.GetChannel(e.Data.Channel);
-            IDictionaryEnumerator userEnum = channel.Users.GetEnumerator();
-
-            worker.ReportProgress(0, new ProgressReport(ProgressReportType.GetViewers, userEnum));
+            reportWorkerProgressForViewerList(sender as IrcClient, e.Data.Channel);
         }
 
         void client_OnQuit(object sender, QuitEventArgs e)
         {
-            IrcClient client = sender as IrcClient;
-            Channel channel = client.GetChannel(e.Data.Channel);
-            IDictionaryEnumerator userEnum = channel.Users.GetEnumerator();
-
-            worker.ReportProgress(0, new ProgressReport(ProgressReportType.GetViewers, userEnum));
+            reportWorkerProgressForViewerList(sender as IrcClient, e.Data.Channel);
         }
 
         # endregion

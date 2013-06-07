@@ -28,11 +28,13 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.lblExclude = new System.Windows.Forms.Label();
             this.txtExclude = new System.Windows.Forms.TextBox();
             this.btnPick = new System.Windows.Forms.Button();
             this.lblStatus = new System.Windows.Forms.Label();
             this.lblWinner = new System.Windows.Forms.Label();
+            this.toolTip = new System.Windows.Forms.ToolTip(this.components);
             this.SuspendLayout();
             // 
             // lblExclude
@@ -52,6 +54,8 @@
             this.txtExclude.ScrollBars = System.Windows.Forms.ScrollBars.Both;
             this.txtExclude.Size = new System.Drawing.Size(486, 140);
             this.txtExclude.TabIndex = 1;
+            this.toolTip.SetToolTip(this.txtExclude, "Want to exclude certain viewers from winning your giveaway?  Place each name on a" +
+        " separate line.");
             // 
             // btnPick
             // 
@@ -112,5 +116,6 @@
         private System.Windows.Forms.Button btnPick;
         private System.Windows.Forms.Label lblStatus;
         private System.Windows.Forms.Label lblWinner;
+        private System.Windows.Forms.ToolTip toolTip;
     }
 }

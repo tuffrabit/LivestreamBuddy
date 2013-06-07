@@ -38,11 +38,12 @@
             this.lblChannel = new System.Windows.Forms.Label();
             this.lstViewers = new System.Windows.Forms.ListBox();
             this.grpSetup = new System.Windows.Forms.GroupBox();
+            this.btnGiveaway = new System.Windows.Forms.Button();
             this.btnConnect = new System.Windows.Forms.Button();
             this.txtMessage = new System.Windows.Forms.TextBox();
             this.txtMessages = new System.Windows.Forms.TextBox();
-            this.btnGiveaway = new System.Windows.Forms.Button();
             this.toolTip = new System.Windows.Forms.ToolTip(this.components);
+            this.lblViewerCount = new System.Windows.Forms.Label();
             this.grpSetup.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -103,9 +104,9 @@
             this.lstViewers.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.lstViewers.FormattingEnabled = true;
-            this.lstViewers.Location = new System.Drawing.Point(383, 151);
+            this.lstViewers.Location = new System.Drawing.Point(383, 177);
             this.lstViewers.Name = "lstViewers";
-            this.lstViewers.Size = new System.Drawing.Size(200, 277);
+            this.lstViewers.Size = new System.Drawing.Size(200, 251);
             this.lstViewers.TabIndex = 6;
             // 
             // grpSetup
@@ -126,6 +127,17 @@
             this.grpSetup.TabIndex = 7;
             this.grpSetup.TabStop = false;
             this.grpSetup.Text = "Setup";
+            // 
+            // btnGiveaway
+            // 
+            this.btnGiveaway.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnGiveaway.Location = new System.Drawing.Point(370, 95);
+            this.btnGiveaway.Name = "btnGiveaway";
+            this.btnGiveaway.Size = new System.Drawing.Size(125, 23);
+            this.btnGiveaway.TabIndex = 5;
+            this.btnGiveaway.Text = "Giveaway";
+            this.btnGiveaway.UseVisualStyleBackColor = true;
+            this.btnGiveaway.Click += new System.EventHandler(this.btnGiveaway_Click);
             // 
             // btnConnect
             // 
@@ -159,21 +171,22 @@
             this.txtMessages.Size = new System.Drawing.Size(364, 277);
             this.txtMessages.TabIndex = 9;
             // 
-            // btnGiveaway
+            // lblViewerCount
             // 
-            this.btnGiveaway.Location = new System.Drawing.Point(370, 95);
-            this.btnGiveaway.Name = "btnGiveaway";
-            this.btnGiveaway.Size = new System.Drawing.Size(125, 23);
-            this.btnGiveaway.TabIndex = 5;
-            this.btnGiveaway.Text = "Giveaway";
-            this.btnGiveaway.UseVisualStyleBackColor = true;
-            this.btnGiveaway.Click += new System.EventHandler(this.btnGiveaway_Click);
+            this.lblViewerCount.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.lblViewerCount.AutoSize = true;
+            this.lblViewerCount.Location = new System.Drawing.Point(380, 151);
+            this.lblViewerCount.Name = "lblViewerCount";
+            this.lblViewerCount.Size = new System.Drawing.Size(73, 13);
+            this.lblViewerCount.TabIndex = 10;
+            this.lblViewerCount.Text = "Viewer Count:";
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(596, 471);
+            this.Controls.Add(this.lblViewerCount);
             this.Controls.Add(this.txtMessages);
             this.Controls.Add(this.txtMessage);
             this.Controls.Add(this.grpSetup);
@@ -204,6 +217,7 @@
         private System.Windows.Forms.TextBox txtMessages;
         private System.Windows.Forms.Button btnGiveaway;
         private System.Windows.Forms.ToolTip toolTip;
+        private System.Windows.Forms.Label lblViewerCount;
 
     }
 }
