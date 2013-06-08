@@ -8,3 +8,13 @@ C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\Livestre
 C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\LivestreamBuddy\obj\Release\LivestreamBuddy.exe
 C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\LivestreamBuddy\obj\Release\LivestreamBuddy.pdb
 C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\LivestreamBuddy\obj\Release\LivestreamBuddy.csprojResolveAssemblyReference.cache
+C:\dev\LivestreamBuddy\LivestreamBuddy\bin\Release\LivestreamBuddy.exe.config
+C:\dev\LivestreamBuddy\LivestreamBuddy\obj\Release\LivestreamBuddy.exe
+C:\dev\LivestreamBuddy\LivestreamBuddy\obj\Release\LivestreamBuddy.pdb
+C:\dev\LivestreamBuddy\LivestreamBuddy\bin\Release\LivestreamBuddy.exe
+C:\dev\LivestreamBuddy\LivestreamBuddy\bin\Release\LivestreamBuddy.pdb
+C:\dev\LivestreamBuddy\LivestreamBuddy\obj\Release\LivestreamBuddy.csprojResolveAssemblyReference.cache
+C:\dev\LivestreamBuddy\LivestreamBuddy\obj\Release\LivestreamBuddy.Form1.resources
+C:\dev\LivestreamBuddy\LivestreamBuddy\obj\Release\LivestreamBuddy.frmGiveaway.resources
+C:\dev\LivestreamBuddy\LivestreamBuddy\obj\Release\LivestreamBuddy.Properties.Resources.resources
+C:\dev\LivestreamBuddy\LivestreamBuddy\obj\Release\LivestreamBuddy.csproj.GenerateResource.Cache

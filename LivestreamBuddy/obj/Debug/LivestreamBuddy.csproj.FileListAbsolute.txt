@@ -8,3 +8,13 @@ c:\users\rboucher\documents\visual studio 2012\Projects\LivestreamBuddy\Livestre
 c:\users\rboucher\documents\visual studio 2012\Projects\LivestreamBuddy\LivestreamBuddy\obj\Debug\LivestreamBuddy.pdb
 c:\users\rboucher\documents\visual studio 2012\Projects\LivestreamBuddy\LivestreamBuddy\obj\Debug\LivestreamBuddy.Form1.resources
 C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\LivestreamBuddy\obj\Debug\LivestreamBuddy.frmGiveaway.resources
+C:\dev\LivestreamBuddy\LivestreamBuddy\bin\Debug\LivestreamBuddy.exe.config
+C:\dev\LivestreamBuddy\LivestreamBuddy\obj\Debug\LivestreamBuddy.exe
+C:\dev\LivestreamBuddy\LivestreamBuddy\obj\Debug\LivestreamBuddy.pdb
+C:\dev\LivestreamBuddy\LivestreamBuddy\bin\Debug\LivestreamBuddy.exe
+C:\dev\LivestreamBuddy\LivestreamBuddy\bin\Debug\LivestreamBuddy.pdb
+C:\dev\LivestreamBuddy\LivestreamBuddy\obj\Debug\LivestreamBuddy.csprojResolveAssemblyReference.cache
+C:\dev\LivestreamBuddy\LivestreamBuddy\obj\Debug\LivestreamBuddy.Form1.resources
+C:\dev\LivestreamBuddy\LivestreamBuddy\obj\Debug\LivestreamBuddy.frmGiveaway.resources
+C:\dev\LivestreamBuddy\LivestreamBuddy\obj\Debug\LivestreamBuddy.Properties.Resources.resources
+C:\dev\LivestreamBuddy\LivestreamBuddy\obj\Debug\LivestreamBuddy.csproj.GenerateResource.Cache

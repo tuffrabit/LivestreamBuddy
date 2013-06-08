@@ -142,7 +142,7 @@ namespace LivestreamBuddy
 
             try
             {
-                client.Connect(startupInfo.Username + ".jtvirc.com", 6667);
+                client.Connect("irc.twitch.tv", 6667);
             }
             catch (ConnectionException ex)
             {
