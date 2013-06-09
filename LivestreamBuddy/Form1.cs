@@ -34,6 +34,7 @@ namespace LivestreamBuddy
         private BackgroundWorker worker;
         private List<string> giveawayExcludeList;
         private Queue<string> messages;
+        private StartupInfo info;
 
         public Form1()
         {
@@ -60,12 +61,13 @@ namespace LivestreamBuddy
             txtMessages.ScrollToCaret();
         }
 
-        private void reportWorkerProgressForViewerList(IrcClient client, string channelName)
+        private int reportWorkerProgressForViewerList(IrcClient client, string channelName)
         {
             Channel channel = client.GetChannel(channelName);
-            IDictionaryEnumerator userEnum = channel.Users.GetEnumerator();
 
-            worker.ReportProgress(0, new ProgressReport(ProgressReportType.GetViewers, userEnum));
+            worker.ReportProgress(0, new ProgressReport(ProgressReportType.GetViewers, channel.Users));
+
+            return channel.Users.Count;
         }
 
         # region Events
@@ -92,6 +94,7 @@ namespace LivestreamBuddy
                     lstViewers.Items.Clear();
                     txtMessages.Clear();
                     btnConnect.Enabled = false;
+                    messagesWriteLine("Connecting...");
                     worker.RunWorkerAsync(new StartupInfo(txtUsername.Text, txtPassword.Text, txtChannel.Text));
                 }
             }
@@ -133,12 +136,10 @@ namespace LivestreamBuddy
             StartupInfo startupInfo = e.Argument as StartupInfo;
             IrcClient client = new IrcClient();
 
+            info = startupInfo;
+            client.OnConnected += client_OnConnected;
             client.OnError += client_OnError;
-            client.OnChannelMessage += client_OnChannelMessage;
-            client.OnChannelActiveSynced += client_OnChannelActiveSynced;
-            client.OnJoin += client_OnJoin;
-            client.OnAway += client_OnAway;
-            client.OnQuit += client_OnQuit;
+            client.ActiveChannelSyncing = true;
 
             try
             {
@@ -148,15 +149,86 @@ namespace LivestreamBuddy
             {
                 theWorker.ReportProgress(0, new ProgressReport(ProgressReportType.Error, ex.Message));
             }
+        }        
+
+        void worker_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        {
+            ProgressReport info = e.UserState as ProgressReport;
+
+            switch (info.Type)
+            {
+                case ProgressReportType.Connect:
+                    messagesWriteLine("Connected!");
+                    messagesWriteLine("Logging in...");
+
+                    break;
+                case ProgressReportType.Login:
+                    messagesWriteLine("Logged in!");
+                    messagesWriteLine("Joining channel " + txtChannel.Text + "...");
+
+                    break;
+                case ProgressReportType.ChannelJoin:
+                    messagesWriteLine("Channel joined!");
+                    Thread.Sleep(75);
+                    txtMessages.Clear();
+                    lstViewers.Items.Add("Getting viewer list...");
+                    btnConnect.Enabled = true;
+                    btnConnect.Text = "Disconnect";
+                    btnGiveaway.Enabled = true;
+
+                    break;
+                case ProgressReportType.Error:
+                    messagesWriteLine((string)info.Data);
+
+                    break;
+                case ProgressReportType.Message:
+                    messagesWriteLine((string)info.Data);
+
+                    break;
+                case ProgressReportType.GetViewers:
+                    Hashtable users = info.Data as Hashtable;
+
+                    if (users.Count > 1)
+                    {
+                        lstViewers.Items.Clear();
+
+                        foreach (DictionaryEntry user in users)
+                        {
+                            ChannelUser viewer = (ChannelUser)user.Value;
+
+                            lstViewers.Items.Add(viewer.Nick);
+                        }
+
+                        lblViewerCount.Text = "Viewer Count: " + lstViewers.Items.Count;
+                    }
+
+                    break;
+            }
+        }
+
+        void worker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            btnGiveaway.Enabled = false;
+            btnConnect.Enabled = true;
+            btnConnect.Text = "Connect";
+
+            txtMessages.Clear();
+            lblViewerCount.Text = "Viewer Count:";
+            lstViewers.Items.Clear();
+        }
+
+        void client_OnConnected(object sender, EventArgs e)
+        {
+            IrcClient client = sender as IrcClient;
 
             if (client.IsConnected)
             {
-                client.Login(startupInfo.Username, startupInfo.Username, 0, startupInfo.Username.ToLower(), startupInfo.Password);
-                client.RfcJoin(startupInfo.Channel);
-
-                theWorker.ReportProgress(0, new ProgressReport(ProgressReportType.Connect, null));
-
-                client.ActiveChannelSyncing = true;
+                worker.ReportProgress(0, new ProgressReport(ProgressReportType.Connect, null));
+                
+                client.Login(info.Username, info.Username, 0, info.Username.ToLower(), info.Password);
+                worker.ReportProgress(0, new ProgressReport(ProgressReportType.Login, null));
+                
+                client.RfcJoin(info.Channel, Priority.Critical);                
 
                 var tokenSource = new CancellationTokenSource();
                 CancellationToken ct = tokenSource.Token;
@@ -175,82 +247,58 @@ namespace LivestreamBuddy
                     }
                 , tokenSource.Token);
 
+                bool isJoined = false;
+                int numberOfViewers = 0;
+
                 while (true)
                 {
-                    if ((theWorker.CancellationPending == true))
+                    if ((worker.CancellationPending == true))
                     {
-                        e.Cancel = true;
                         break;
                     }
 
                     Thread.Sleep(100);
 
-                    lock (messages)
+                    if (isJoined)
                     {
-                        if (messages.Count > 0)
+                        if (numberOfViewers == 1)
                         {
-                            foreach (string message in messages)
-                            {
-                                client.SendMessage(SendType.Message, startupInfo.Channel, message);
-                                theWorker.ReportProgress(0, new ProgressReport(ProgressReportType.Message, startupInfo.Username + ": " + message));
-                            }
+                            numberOfViewers = reportWorkerProgressForViewerList(client, info.Channel);
+                        }
 
-                            messages.Clear();
+                        lock (messages)
+                        {
+                            if (messages.Count > 0)
+                            {
+                                foreach (string message in messages)
+                                {
+                                    client.SendMessage(SendType.Message, info.Channel, message);
+                                    worker.ReportProgress(0, new ProgressReport(ProgressReportType.Message, info.Username + ": " + message));
+                                }
+
+                                messages.Clear();
+                            }
                         }
                     }
+                    else if (client.IsJoined(info.Channel))
+                    {
+                        isJoined = true;
+                        worker.ReportProgress(0, new ProgressReport(ProgressReportType.ChannelJoin, null));
+                        client.RfcNames(info.Channel, Priority.Critical);
+                        numberOfViewers = reportWorkerProgressForViewerList(client, info.Channel);
+
+                        client.OnChannelMessage += client_OnChannelMessage;
+                        client.OnChannelActiveSynced += client_OnChannelActiveSynced;
+                        client.OnJoin += client_OnJoin;
+                        client.OnAway += client_OnAway;
+                        client.OnQuit += client_OnQuit;
+                    }                    
                 }
 
                 tokenSource.Cancel();
+                client.RfcQuit(Priority.Critical);
                 client.Disconnect();
             }
-        }
-
-        void worker_ProgressChanged(object sender, ProgressChangedEventArgs e)
-        {
-            ProgressReport info = e.UserState as ProgressReport;
-
-            switch (info.Type)
-            {
-                case ProgressReportType.Connect:
-                    btnConnect.Enabled = true;
-                    btnConnect.Text = "Disconnect";
-                    btnGiveaway.Enabled = true;
-
-                    break;
-                case ProgressReportType.Error:
-                    messagesWriteLine((string)info.Data);
-
-                    break;
-                case ProgressReportType.Message:
-                    messagesWriteLine((string)info.Data);
-
-                    break;
-                case ProgressReportType.GetViewers:
-                    lstViewers.Items.Clear();
-                    IDictionaryEnumerator userEnum = info.Data as IDictionaryEnumerator;
-
-                    while (userEnum.MoveNext())
-                    {
-                        string key = (string)userEnum.Key;
-                        ChannelUser viewer = (ChannelUser)userEnum.Value;
-
-                        lstViewers.Items.Add(viewer.Nick);
-                    }
-
-                    lblViewerCount.Text = "Viewer Count: " + lstViewers.Items.Count;
-
-                    break;
-            }
-        }
-
-        void worker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
-        {
-            btnGiveaway.Enabled = false;
-            btnConnect.Enabled = true;
-            btnConnect.Text = "Connect";
-
-            lblViewerCount.Text = "Viewer Count:";
-            lstViewers.Items.Clear();
         }
 
         void client_OnChannelMessage(object sender, IrcEventArgs e)
@@ -335,6 +383,8 @@ namespace LivestreamBuddy
     {
         Unknown, 
         Connect, 
+        Login, 
+        ChannelJoin, 
         GetViewers, 
         Message, 
         Error, 
