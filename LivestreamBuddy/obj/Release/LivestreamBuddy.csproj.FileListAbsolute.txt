@@ -18,3 +18,9 @@ C:\dev\LivestreamBuddy\LivestreamBuddy\obj\Release\LivestreamBuddy.Form1.resourc
 C:\dev\LivestreamBuddy\LivestreamBuddy\obj\Release\LivestreamBuddy.frmGiveaway.resources
 C:\dev\LivestreamBuddy\LivestreamBuddy\obj\Release\LivestreamBuddy.Properties.Resources.resources
 C:\dev\LivestreamBuddy\LivestreamBuddy\obj\Release\LivestreamBuddy.csproj.GenerateResource.Cache
+C:\dev\LivestreamBuddy\LivestreamBuddy\bin\Release\LobsterKnifeFight.dll
+C:\dev\LivestreamBuddy\LivestreamBuddy\bin\Release\Newtonsoft.Json.dll
+C:\dev\LivestreamBuddy\LivestreamBuddy\bin\Release\LobsterKnifeFight.pdb
+C:\dev\LivestreamBuddy\LivestreamBuddy\bin\Release\Newtonsoft.Json.pdb
+C:\dev\LivestreamBuddy\LivestreamBuddy\bin\Release\Newtonsoft.Json.xml
+C:\dev\LivestreamBuddy\LivestreamBuddy\obj\Release\LivestreamBuddy.AuthForm.resources

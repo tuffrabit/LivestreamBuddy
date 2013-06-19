@@ -3,6 +3,10 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LivestreamBuddy", "LivestreamBuddy\LivestreamBuddy.csproj", "{7490B27F-BCC8-4089-95A3-D9E3731EEF87}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LobsterKnifeFight", "LobsterKnifeFight\LobsterKnifeFight.csproj", "{1530732E-973A-4E53-BFB4-E373FB127C44}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Newtonsoft.Json.Net40", "Newtonsoft.Json\Newtonsoft.Json.Net40.csproj", "{A9AE40FF-1A21-414A-9FE7-3BE13644CC6D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -13,6 +17,14 @@ Global
 		{7490B27F-BCC8-4089-95A3-D9E3731EEF87}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7490B27F-BCC8-4089-95A3-D9E3731EEF87}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7490B27F-BCC8-4089-95A3-D9E3731EEF87}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1530732E-973A-4E53-BFB4-E373FB127C44}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1530732E-973A-4E53-BFB4-E373FB127C44}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1530732E-973A-4E53-BFB4-E373FB127C44}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1530732E-973A-4E53-BFB4-E373FB127C44}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A9AE40FF-1A21-414A-9FE7-3BE13644CC6D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A9AE40FF-1A21-414A-9FE7-3BE13644CC6D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A9AE40FF-1A21-414A-9FE7-3BE13644CC6D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A9AE40FF-1A21-414A-9FE7-3BE13644CC6D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

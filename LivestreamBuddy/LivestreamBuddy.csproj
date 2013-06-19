@@ -44,6 +44,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AuthForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AuthForm.Designer.cs">
+      <DependentUpon>AuthForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Consts.cs" />
     <Compile Include="EventArgs.cs" />
     <Compile Include="Exceptions.cs" />
@@ -81,6 +87,9 @@
     <Compile Include="Logger.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="AuthForm.resx">
+      <DependentUpon>AuthForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>
@@ -112,6 +121,12 @@
   <ItemGroup>
     <Content Include="License.txt" />
     <Content Include="livestream-ICON.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\LobsterKnifeFight\LobsterKnifeFight.csproj">
+      <Project>{1530732e-973a-4e53-bfb4-e373fb127c44}</Project>
+      <Name>LobsterKnifeFight</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

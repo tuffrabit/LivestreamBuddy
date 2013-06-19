@@ -26,6 +26,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Meebey.SmartIrc4net;
+using LivestreamBuddy;
+using System.Diagnostics;
 
 namespace LivestreamBuddy
 {
@@ -34,7 +36,8 @@ namespace LivestreamBuddy
         private BackgroundWorker worker;
         private List<string> giveawayExcludeList;
         private Queue<string> messages;
-        private StartupInfo info;
+        private StartupInfo startInfo;
+        private int lastChannelSync;
 
         public Form1()
         {
@@ -50,8 +53,8 @@ namespace LivestreamBuddy
             worker.RunWorkerCompleted += worker_RunWorkerCompleted;
 
             giveawayExcludeList = new List<string>();
-
             messages = new Queue<string>();
+            lastChannelSync = Environment.TickCount;
         }
 
         private void messagesWriteLine(string line)
@@ -63,7 +66,7 @@ namespace LivestreamBuddy
 
         private int reportWorkerProgressForViewerList(IrcClient client, string channelName)
         {
-            Channel channel = client.GetChannel(channelName);
+            Meebey.SmartIrc4net.Channel channel = client.GetChannel(channelName);
 
             worker.ReportProgress(0, new ProgressReport(ProgressReportType.GetViewers, channel.Users));
 
@@ -76,6 +79,15 @@ namespace LivestreamBuddy
         {
             if (btnConnect.Text.ToLower() == "connect")
             {
+                /*User user = new User();
+
+                user.UserId = txtUsername.Text;
+                user.Password = txtPassword.Text;
+                user.Scope = UserScope.ChannelEditor;
+
+                AuthForm bob = new AuthForm(user);
+                bob.ShowDialog(this);*/
+
                 if (string.IsNullOrEmpty(txtUsername.Text))
                 {
                     MessageBox.Show("You must provide a username.");
@@ -136,7 +148,7 @@ namespace LivestreamBuddy
             StartupInfo startupInfo = e.Argument as StartupInfo;
             IrcClient client = new IrcClient();
 
-            info = startupInfo;
+            startInfo = startupInfo;
             client.OnConnected += client_OnConnected;
             client.OnError += client_OnError;
             client.ActiveChannelSyncing = true;
@@ -175,6 +187,7 @@ namespace LivestreamBuddy
                     btnConnect.Enabled = true;
                     btnConnect.Text = "Disconnect";
                     btnGiveaway.Enabled = true;
+                    txtChannel.Enabled = false;
 
                     break;
                 case ProgressReportType.Error:
@@ -190,6 +203,7 @@ namespace LivestreamBuddy
 
                     if (users.Count > 1)
                     {
+                        lstViewers.BeginUpdate();
                         lstViewers.Items.Clear();
 
                         foreach (DictionaryEntry user in users)
@@ -199,7 +213,17 @@ namespace LivestreamBuddy
                             lstViewers.Items.Add(viewer.Nick);
                         }
 
-                        lblViewerCount.Text = "Viewer Count: " + lstViewers.Items.Count;
+                        lstViewers.EndUpdate();
+                    }
+
+                    break;
+                case ProgressReportType.UpdateChannelInfo:
+                    LivestreamBuddy.StreamManager streamManager = new StreamManager();
+                    LivestreamBuddy.Stream stream = streamManager.GetStream(txtChannel.Text);
+
+                    if (stream.IsOnline)
+                    {
+                        lblViewerCount.Text = "Viewer Count: " + stream.ViewerCount;
                     }
 
                     break;
@@ -208,6 +232,7 @@ namespace LivestreamBuddy
 
         void worker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
+            txtChannel.Enabled = true;
             btnGiveaway.Enabled = false;
             btnConnect.Enabled = true;
             btnConnect.Text = "Connect";
@@ -225,10 +250,10 @@ namespace LivestreamBuddy
             {
                 worker.ReportProgress(0, new ProgressReport(ProgressReportType.Connect, null));
                 
-                client.Login(info.Username, info.Username, 0, info.Username.ToLower(), info.Password);
+                client.Login(startInfo.Username, startInfo.Username, 0, startInfo.Username.ToLower(), startInfo.Password);
                 worker.ReportProgress(0, new ProgressReport(ProgressReportType.Login, null));
                 
-                client.RfcJoin(info.Channel, Priority.Critical);                
+                client.RfcJoin(startInfo.Channel, Priority.Critical);                
 
                 var tokenSource = new CancellationTokenSource();
                 CancellationToken ct = tokenSource.Token;
@@ -263,7 +288,15 @@ namespace LivestreamBuddy
                     {
                         if (numberOfViewers == 1)
                         {
-                            numberOfViewers = reportWorkerProgressForViewerList(client, info.Channel);
+                            numberOfViewers = reportWorkerProgressForViewerList(client, startInfo.Channel);
+                        }
+
+                        int ticks = Environment.TickCount;
+                        if (ticks - lastChannelSync > 60000)
+                        {
+                            worker.ReportProgress(0, new ProgressReport(ProgressReportType.UpdateChannelInfo, null));
+                            reportWorkerProgressForViewerList(client, startInfo.Channel);
+                            lastChannelSync = ticks;
                         }
 
                         lock (messages)
@@ -272,20 +305,21 @@ namespace LivestreamBuddy
                             {
                                 foreach (string message in messages)
                                 {
-                                    client.SendMessage(SendType.Message, info.Channel, message);
-                                    worker.ReportProgress(0, new ProgressReport(ProgressReportType.Message, info.Username + ": " + message));
+                                    client.SendMessage(SendType.Message, startInfo.Channel, message);
+                                    worker.ReportProgress(0, new ProgressReport(ProgressReportType.Message, startInfo.Username + ": " + message));
                                 }
 
                                 messages.Clear();
                             }
                         }
                     }
-                    else if (client.IsJoined(info.Channel))
+                    else if (client.IsJoined(startInfo.Channel))
                     {
                         isJoined = true;
                         worker.ReportProgress(0, new ProgressReport(ProgressReportType.ChannelJoin, null));
-                        client.RfcNames(info.Channel, Priority.Critical);
-                        numberOfViewers = reportWorkerProgressForViewerList(client, info.Channel);
+                        worker.ReportProgress(0, new ProgressReport(ProgressReportType.UpdateChannelInfo, null));
+                        client.RfcNames(startInfo.Channel, Priority.Critical);
+                        numberOfViewers = reportWorkerProgressForViewerList(client, startInfo.Channel);
 
                         client.OnChannelMessage += client_OnChannelMessage;
                         client.OnChannelActiveSynced += client_OnChannelActiveSynced;
@@ -387,6 +421,7 @@ namespace LivestreamBuddy
         ChannelJoin, 
         GetViewers, 
         Message, 
+        UpdateChannelInfo, 
         Error, 
         Query
     }
