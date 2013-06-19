@@ -6,3 +6,11 @@ C:\dev\LivestreamBuddy\Newtonsoft.Json\bin\Debug\Net40\Newtonsoft.Json.dll.lastc
 C:\dev\LivestreamBuddy\Newtonsoft.Json\obj\Debug\Newtonsoft.Json.Net40.csprojResolveAssemblyReference.cache
 C:\dev\LivestreamBuddy\Newtonsoft.Json\obj\Debug\Newtonsoft.Json.dll
 C:\dev\LivestreamBuddy\Newtonsoft.Json\obj\Debug\Newtonsoft.Json.pdb
+C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\Newtonsoft.Json\bin\Debug\Net40\Newtonsoft.Json.xml
+C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\Newtonsoft.Json\bin\Debug\Net40\Newtonsoft.Json.dll
+C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\Newtonsoft.Json\bin\Debug\Net40\Newtonsoft.Json.pdb
+C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\Newtonsoft.Json\bin\Debug\Net40\Newtonsoft.Json.dll.CodeAnalysisLog.xml
+C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\Newtonsoft.Json\bin\Debug\Net40\Newtonsoft.Json.dll.lastcodeanalysissucceeded
+C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\Newtonsoft.Json\obj\Debug\Newtonsoft.Json.Net40.csprojResolveAssemblyReference.cache
+C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\Newtonsoft.Json\obj\Debug\Newtonsoft.Json.dll
+C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\Newtonsoft.Json\obj\Debug\Newtonsoft.Json.pdb

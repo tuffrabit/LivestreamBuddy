@@ -24,3 +24,9 @@ C:\dev\LivestreamBuddy\LivestreamBuddy\bin\Release\LobsterKnifeFight.pdb
 C:\dev\LivestreamBuddy\LivestreamBuddy\bin\Release\Newtonsoft.Json.pdb
 C:\dev\LivestreamBuddy\LivestreamBuddy\bin\Release\Newtonsoft.Json.xml
 C:\dev\LivestreamBuddy\LivestreamBuddy\obj\Release\LivestreamBuddy.AuthForm.resources
+C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\LivestreamBuddy\bin\Release\LobsterKnifeFight.dll
+C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\LivestreamBuddy\bin\Release\Newtonsoft.Json.dll
+C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\LivestreamBuddy\bin\Release\LobsterKnifeFight.pdb
+C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\LivestreamBuddy\bin\Release\Newtonsoft.Json.pdb
+C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\LivestreamBuddy\bin\Release\Newtonsoft.Json.xml
+C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\LivestreamBuddy\obj\Release\LivestreamBuddy.AuthForm.resources

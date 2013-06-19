@@ -6,3 +6,11 @@ C:\dev\LivestreamBuddy\LobsterKnifeFight\bin\Release\Newtonsoft.Json.xml
 C:\dev\LivestreamBuddy\LobsterKnifeFight\obj\Release\LobsterKnifeFight.csprojResolveAssemblyReference.cache
 C:\dev\LivestreamBuddy\LobsterKnifeFight\obj\Release\LobsterKnifeFight.dll
 C:\dev\LivestreamBuddy\LobsterKnifeFight\obj\Release\LobsterKnifeFight.pdb
+C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\LobsterKnifeFight\bin\Release\LobsterKnifeFight.dll
+C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\LobsterKnifeFight\bin\Release\LobsterKnifeFight.pdb
+C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\LobsterKnifeFight\bin\Release\Newtonsoft.Json.dll
+C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\LobsterKnifeFight\bin\Release\Newtonsoft.Json.pdb
+C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\LobsterKnifeFight\bin\Release\Newtonsoft.Json.xml
+C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\LobsterKnifeFight\obj\Release\LobsterKnifeFight.csprojResolveAssemblyReference.cache
+C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\LobsterKnifeFight\obj\Release\LobsterKnifeFight.dll
+C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\LobsterKnifeFight\obj\Release\LobsterKnifeFight.pdb

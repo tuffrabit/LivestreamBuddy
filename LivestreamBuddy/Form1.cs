@@ -28,6 +28,7 @@ using System.Windows.Forms;
 using Meebey.SmartIrc4net;
 using LivestreamBuddy;
 using System.Diagnostics;
+using System.IO;
 
 namespace LivestreamBuddy
 {
@@ -35,14 +36,20 @@ namespace LivestreamBuddy
     {
         private BackgroundWorker worker;
         private List<string> giveawayExcludeList;
+        private object messagesLock;
         private Queue<string> messages;
         private StartupInfo startInfo;
+        private User user;
         private int lastChannelSync;
+        private volatile bool shouldListenThreadStop;
 
         public Form1()
         {
             InitializeComponent();
 
+            txtStreamTitle.ReadOnly = true;
+            txtStreamGame.ReadOnly = true;
+            btnStreamUpdate.Enabled = false;
             btnGiveaway.Enabled = false;
 
             worker = new BackgroundWorker();
@@ -53,8 +60,11 @@ namespace LivestreamBuddy
             worker.RunWorkerCompleted += worker_RunWorkerCompleted;
 
             giveawayExcludeList = new List<string>();
+            messagesLock = new object();
             messages = new Queue<string>();
+            user = new User();
             lastChannelSync = Environment.TickCount;
+            shouldListenThreadStop = false;
         }
 
         private void messagesWriteLine(string line)
@@ -79,15 +89,6 @@ namespace LivestreamBuddy
         {
             if (btnConnect.Text.ToLower() == "connect")
             {
-                /*User user = new User();
-
-                user.UserId = txtUsername.Text;
-                user.Password = txtPassword.Text;
-                user.Scope = UserScope.ChannelEditor;
-
-                AuthForm bob = new AuthForm(user);
-                bob.ShowDialog(this);*/
-
                 if (string.IsNullOrEmpty(txtUsername.Text))
                 {
                     MessageBox.Show("You must provide a username.");
@@ -106,6 +107,7 @@ namespace LivestreamBuddy
                     lstViewers.Items.Clear();
                     txtMessages.Clear();
                     btnConnect.Enabled = false;
+                    shouldListenThreadStop = false;
                     messagesWriteLine("Connecting...");
                     worker.RunWorkerAsync(new StartupInfo(txtUsername.Text, txtPassword.Text, txtChannel.Text));
                 }
@@ -133,7 +135,7 @@ namespace LivestreamBuddy
         {
             if (e.KeyCode == Keys.Enter)
             {
-                lock (messages)
+                lock (messagesLock)
                 {
                     messages.Enqueue(txtMessage.Text);
                 }
@@ -187,7 +189,26 @@ namespace LivestreamBuddy
                     btnConnect.Enabled = true;
                     btnConnect.Text = "Disconnect";
                     btnGiveaway.Enabled = true;
+                    txtUsername.Enabled = false;
+                    txtPassword.Enabled = false;
                     txtChannel.Enabled = false;
+
+                    if (string.Compare(txtUsername.Text, txtChannel.Text, StringComparison.OrdinalIgnoreCase) == 0)
+                    {
+                        user.UserId = txtUsername.Text;
+                        user.Password = txtPassword.Text;
+                        user.Scope = UserScope.ChannelEditor;
+
+                        AuthForm bob = new AuthForm(user);
+                        bob.ShowDialog(this);
+
+                        if (!string.IsNullOrEmpty(user.AccessToken))
+                        {
+                            txtStreamTitle.ReadOnly = false;
+                            txtStreamGame.ReadOnly = false;
+                            //btnStreamUpdate.Enabled = true;
+                        }
+                    }
 
                     break;
                 case ProgressReportType.Error:
@@ -223,6 +244,8 @@ namespace LivestreamBuddy
 
                     if (stream.IsOnline)
                     {
+                        txtStreamTitle.Text = stream.Channel.Title;
+                        txtStreamGame.Text = stream.Game;
                         lblViewerCount.Text = "Viewer Count: " + stream.ViewerCount;
                     }
 
@@ -232,10 +255,18 @@ namespace LivestreamBuddy
 
         void worker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
+            txtUsername.Enabled = true;
+            txtPassword.Enabled = true;
             txtChannel.Enabled = true;
             btnGiveaway.Enabled = false;
             btnConnect.Enabled = true;
             btnConnect.Text = "Connect";
+
+            txtStreamTitle.Clear();
+            txtStreamGame.Clear();
+            txtStreamTitle.ReadOnly = true;
+            txtStreamGame.ReadOnly = true;
+            btnStreamUpdate.Enabled = false;
 
             txtMessages.Clear();
             lblViewerCount.Text = "Viewer Count:";
@@ -253,24 +284,22 @@ namespace LivestreamBuddy
                 client.Login(startInfo.Username, startInfo.Username, 0, startInfo.Username.ToLower(), startInfo.Password);
                 worker.ReportProgress(0, new ProgressReport(ProgressReportType.Login, null));
                 
-                client.RfcJoin(startInfo.Channel, Priority.Critical);                
+                client.RfcJoin(startInfo.Channel, Priority.Critical);
 
-                var tokenSource = new CancellationTokenSource();
-                CancellationToken ct = tokenSource.Token;
-
-                var listonTask = Task.Factory.StartNew(() =>
+                Thread listenThread = new Thread(delegate()
                     {
-                        ct.ThrowIfCancellationRequested();
-
                         while (true)
                         {
-                            if (!ct.IsCancellationRequested)
+                            if (shouldListenThreadStop)
                             {
-                                client.ListenOnce();
+                                break;
                             }
+
+                            client.ListenOnce();
                         }
-                    }
-                , tokenSource.Token);
+                    });
+
+                listenThread.Start();
 
                 bool isJoined = false;
                 int numberOfViewers = 0;
@@ -282,7 +311,7 @@ namespace LivestreamBuddy
                         break;
                     }
 
-                    Thread.Sleep(100);
+                    Thread.Sleep(10);
 
                     if (isJoined)
                     {
@@ -299,7 +328,7 @@ namespace LivestreamBuddy
                             lastChannelSync = ticks;
                         }
 
-                        lock (messages)
+                        lock (messagesLock)
                         {
                             if (messages.Count > 0)
                             {
@@ -329,8 +358,9 @@ namespace LivestreamBuddy
                     }                    
                 }
 
-                tokenSource.Cancel();
+                shouldListenThreadStop = true;
                 client.RfcQuit(Priority.Critical);
+                listenThread.Join();
                 client.Disconnect();
             }
         }
@@ -343,16 +373,10 @@ namespace LivestreamBuddy
             if (e.Data.Message.ToLower() == "bobtart")
             {
                 reportWorkerProgressForViewerList(sender as IrcClient, e.Data.Channel);
-
-                /*IrcClient client = sender as IrcClient;
-                Channel channel = client.GetChannel(e.Data.Channel);
-                IDictionaryEnumerator userEnum = channel.Users.GetEnumerator();
-
-                worker.ReportProgress(0, new ProgressReport(ProgressReportType.GetViewers, userEnum));*/
             }
         }
 
-        void client_OnError(object sender, ErrorEventArgs e)
+        void client_OnError(object sender, Meebey.SmartIrc4net.ErrorEventArgs e)
         {
             worker.ReportProgress(0, new ProgressReport(ProgressReportType.Error, e.ErrorMessage));
         }

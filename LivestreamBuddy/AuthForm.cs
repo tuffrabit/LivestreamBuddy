@@ -1,4 +1,20 @@
-﻿using System;
+﻿/*Copyright (C) 2013 Robert A. Boucher Jr. (TuFFrabit)
+
+This library is free software; you can redistribute it and/or
+modify it under the terms of the GNU Lesser General Public
+License as published by the Free Software Foundation; either
+version 2.1 of the License, or (at your option) any later version.
+
+This library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public
+License along with this library; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
+
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -25,40 +41,28 @@ namespace LivestreamBuddy
         {
             this.user = user;
             string userScope = EnumHelper.GetUserScope(user.Scope);
-            url = "https://api.twitch.tv/kraken/oauth2/authorize?response_type=token&client_id=a13o59im5mfpi5y8afoc3jer8vidva0&redirect_uri=http://localhost&scope=" + userScope;
+            url = "https://api.twitch.tv/kraken/oauth2/authorize?response_type=token&client_id=a13o59im5mfpi5y8afoc3jer8vidva0&redirect_uri=http://www.google.com&scope=" + userScope;
 
             webBrowser.Navigate(url);
-            //webBrowser.Navigating += webBrowser_Navigating;
             webBrowser.Navigated += webBrowser_Navigated;
         }
 
         void webBrowser_Navigated(object sender, WebBrowserNavigatedEventArgs e)
         {
-            //throw new NotImplementedException();
-            if (e.Url.OriginalString.Contains("api.twitch.tv/kraken/oauth2/allow"))
+            if (!string.IsNullOrEmpty(e.Url.Fragment))
             {
-                //webBrowser.Navigate(url);
-                HttpWebRequest request = WebRequest.Create("https://api.twitch.tv/kraken/oauth2/token") as HttpWebRequest;
-                string postData = "client_id=a13o59im5mfpi5y8afoc3jer8vidva0&client_secret=tre25a95srpev7j03kvoslxt93ysdt4&";
+                int keyIndex = e.Url.Fragment.IndexOf("access_token=");
 
-                //request.Headers.Add("Client-ID: a13o59im5mfpi5y8afoc3jer8vidva0");
-
-                using (HttpWebResponse response = request.GetResponse() as HttpWebResponse)
+                if (keyIndex > -1)
                 {
-                    /*StreamReader responseReader = new StreamReader(response.GetResponseStream());
+                    int endIndex = e.Url.Fragment.IndexOf('&', keyIndex) - 14;
 
-                    returnValue = responseReader.ReadToEnd();*/
+                    keyIndex += 13;
+                    user.AccessToken = e.Url.Fragment.Substring(keyIndex, endIndex);
+
+                    this.Close();
                 }
             }
-        }
-
-        void webBrowser_Navigating(object sender, WebBrowserNavigatingEventArgs e)
-        {
-            //throw new NotImplementedException();
-            /*if (e.Url.OriginalString.Contains("api.twitch.tv/kraken/oauth2/allow"))
-            {
-                webBrowser.Navigate(url);
-            }*/
         }
     }
 }
