@@ -41,15 +41,16 @@
             this.btnConnect = new System.Windows.Forms.Button();
             this.btnGiveaway = new System.Windows.Forms.Button();
             this.txtMessage = new System.Windows.Forms.TextBox();
-            this.txtMessages = new System.Windows.Forms.TextBox();
             this.toolTip = new System.Windows.Forms.ToolTip(this.components);
             this.txtStreamTitle = new System.Windows.Forms.TextBox();
             this.txtStreamGame = new System.Windows.Forms.TextBox();
-            this.lblViewerCount = new System.Windows.Forms.Label();
             this.grpChannelInfo = new System.Windows.Forms.GroupBox();
             this.btnStreamUpdate = new System.Windows.Forms.Button();
             this.lblStreamTitle = new System.Windows.Forms.Label();
             this.lblStreamGame = new System.Windows.Forms.Label();
+            this.lblViewerCount = new System.Windows.Forms.LinkLabel();
+            this.btnHelp = new System.Windows.Forms.Button();
+            this.txtMessages = new System.Windows.Forms.RichTextBox();
             this.grpSetup.SuspendLayout();
             this.grpChannelInfo.SuspendLayout();
             this.SuspendLayout();
@@ -70,6 +71,7 @@
             this.txtChannel.Size = new System.Drawing.Size(200, 20);
             this.txtChannel.TabIndex = 2;
             this.toolTip.SetToolTip(this.txtChannel, "The twitch.tv channel you wish to monitor.");
+            this.txtChannel.TextChanged += new System.EventHandler(this.txtChannel_TextChanged);
             // 
             // txtPassword
             // 
@@ -96,6 +98,7 @@
             this.txtUsername.Size = new System.Drawing.Size(200, 20);
             this.txtUsername.TabIndex = 0;
             this.toolTip.SetToolTip(this.txtUsername, "Your twitch.tv username.");
+            this.txtUsername.TextChanged += new System.EventHandler(this.txtUsername_TextChanged);
             // 
             // lblChannel
             // 
@@ -118,6 +121,7 @@
             // 
             // grpSetup
             // 
+            this.grpSetup.Controls.Add(this.btnHelp);
             this.grpSetup.Controls.Add(this.btnConnect);
             this.grpSetup.Controls.Add(this.lblUsername);
             this.grpSetup.Controls.Add(this.lblPassword);
@@ -164,25 +168,14 @@
             this.txtMessage.TabIndex = 0;
             this.txtMessage.KeyDown += new System.Windows.Forms.KeyEventHandler(this.txtMessage_KeyDown);
             // 
-            // txtMessages
-            // 
-            this.txtMessages.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtMessages.Location = new System.Drawing.Point(13, 262);
-            this.txtMessages.Multiline = true;
-            this.txtMessages.Name = "txtMessages";
-            this.txtMessages.ReadOnly = true;
-            this.txtMessages.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.txtMessages.Size = new System.Drawing.Size(364, 331);
-            this.txtMessages.TabIndex = 9;
-            // 
             // txtStreamTitle
             // 
             this.txtStreamTitle.Location = new System.Drawing.Point(82, 23);
             this.txtStreamTitle.Name = "txtStreamTitle";
             this.txtStreamTitle.Size = new System.Drawing.Size(200, 20);
             this.txtStreamTitle.TabIndex = 4;
+            this.toolTip.SetToolTip(this.txtStreamTitle, "Title of the current stream.  You will be able to edit this if you have authentic" +
+        "ated with Twitch.");
             // 
             // txtStreamGame
             // 
@@ -190,16 +183,8 @@
             this.txtStreamGame.Name = "txtStreamGame";
             this.txtStreamGame.Size = new System.Drawing.Size(200, 20);
             this.txtStreamGame.TabIndex = 5;
-            // 
-            // lblViewerCount
-            // 
-            this.lblViewerCount.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.lblViewerCount.AutoSize = true;
-            this.lblViewerCount.Location = new System.Drawing.Point(380, 265);
-            this.lblViewerCount.Name = "lblViewerCount";
-            this.lblViewerCount.Size = new System.Drawing.Size(73, 13);
-            this.lblViewerCount.TabIndex = 10;
-            this.lblViewerCount.Text = "Viewer Count:";
+            this.toolTip.SetToolTip(this.txtStreamGame, "Game of the current stream.  You will be able to edit this if you have authentica" +
+        "ted with Twitch.");
             // 
             // grpChannelInfo
             // 
@@ -226,6 +211,7 @@
             this.btnStreamUpdate.TabIndex = 7;
             this.btnStreamUpdate.Text = "Update";
             this.btnStreamUpdate.UseVisualStyleBackColor = true;
+            this.btnStreamUpdate.Click += new System.EventHandler(this.btnStreamUpdate_Click);
             // 
             // lblStreamTitle
             // 
@@ -245,14 +231,53 @@
             this.lblStreamGame.TabIndex = 3;
             this.lblStreamGame.Text = "Game:";
             // 
+            // lblViewerCount
+            // 
+            this.lblViewerCount.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.lblViewerCount.AutoSize = true;
+            this.lblViewerCount.Location = new System.Drawing.Point(383, 262);
+            this.lblViewerCount.Name = "lblViewerCount";
+            this.lblViewerCount.Size = new System.Drawing.Size(73, 13);
+            this.lblViewerCount.TabIndex = 5;
+            this.lblViewerCount.TabStop = true;
+            this.lblViewerCount.Text = "Viewer Count:";
+            this.toolTip.SetToolTip(this.lblViewerCount, "This count is pulled from Twitch.  It is possible for this to be 0 and still have" +
+        " a viewer list.  The viewer list is pulled from IRC not from Twitch.  Click to f" +
+        "orce an update (may take a moment).");
+            this.lblViewerCount.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lblViewerCount_LinkClicked);
+            // 
+            // btnHelp
+            // 
+            this.btnHelp.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnHelp.Location = new System.Drawing.Point(370, 95);
+            this.btnHelp.Name = "btnHelp";
+            this.btnHelp.Size = new System.Drawing.Size(125, 23);
+            this.btnHelp.TabIndex = 6;
+            this.btnHelp.Text = "Help";
+            this.btnHelp.UseVisualStyleBackColor = true;
+            this.btnHelp.Click += new System.EventHandler(this.btnHelp_Click);
+            // 
+            // txtMessages
+            // 
+            this.txtMessages.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtMessages.Location = new System.Drawing.Point(13, 262);
+            this.txtMessages.Name = "txtMessages";
+            this.txtMessages.ReadOnly = true;
+            this.txtMessages.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Vertical;
+            this.txtMessages.Size = new System.Drawing.Size(364, 322);
+            this.txtMessages.TabIndex = 7;
+            this.txtMessages.Text = "";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(596, 636);
-            this.Controls.Add(this.grpChannelInfo);
-            this.Controls.Add(this.lblViewerCount);
             this.Controls.Add(this.txtMessages);
+            this.Controls.Add(this.lblViewerCount);
+            this.Controls.Add(this.grpChannelInfo);
             this.Controls.Add(this.txtMessage);
             this.Controls.Add(this.grpSetup);
             this.Controls.Add(this.lstViewers);
@@ -260,6 +285,7 @@
             this.Name = "Form1";
             this.Padding = new System.Windows.Forms.Padding(13);
             this.Text = "Livestream Buddy";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
             this.grpSetup.ResumeLayout(false);
             this.grpSetup.PerformLayout();
             this.grpChannelInfo.ResumeLayout(false);
@@ -281,16 +307,17 @@
         private System.Windows.Forms.GroupBox grpSetup;
         private System.Windows.Forms.Button btnConnect;
         private System.Windows.Forms.TextBox txtMessage;
-        private System.Windows.Forms.TextBox txtMessages;
         private System.Windows.Forms.Button btnGiveaway;
         private System.Windows.Forms.ToolTip toolTip;
-        private System.Windows.Forms.Label lblViewerCount;
         private System.Windows.Forms.GroupBox grpChannelInfo;
         private System.Windows.Forms.Button btnStreamUpdate;
         private System.Windows.Forms.Label lblStreamTitle;
         private System.Windows.Forms.Label lblStreamGame;
         private System.Windows.Forms.TextBox txtStreamTitle;
         private System.Windows.Forms.TextBox txtStreamGame;
+        private System.Windows.Forms.LinkLabel lblViewerCount;
+        private System.Windows.Forms.Button btnHelp;
+        private System.Windows.Forms.RichTextBox txtMessages;
 
     }
 }

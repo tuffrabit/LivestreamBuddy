@@ -28,6 +28,8 @@ namespace LivestreamBuddy
     {
         public string RequestDomain { get; set; }
 
+        public string AccessToken { get; set; }
+
         public TwitchRequest()
         {
             RequestDomain = string.Empty;
@@ -44,27 +46,37 @@ namespace LivestreamBuddy
 
             if (!string.IsNullOrEmpty(RequestDomain))
             {
-                string requestUrl = "https://api.twitch.tv/kraken/" + RequestDomain;
+                string requestUrl = string.Format("https://api.twitch.tv/kraken/{0}/{1}", RequestDomain, data);
+                HttpWebRequest request = WebRequest.Create(requestUrl) as HttpWebRequest;
+
+                request.Accept = "application/vnd.twitchtv.v2+json";
+                request.ContentType = "application/json";
+                request.Headers.Add("Client-ID: a13o59im5mfpi5y8afoc3jer8vidva0");
 
                 switch (requestType)
                 {
                     case RequestType.Get:
-                        requestUrl += "/" + data;
+                        request.Method = "GET";
 
                         break;
                     case RequestType.Put:
+                        request.Headers.Add("Authorization: OAuth " + AccessToken);
+                        request.Method = "PUT";
+
+                        byte[] dataBuffer = System.Text.Encoding.UTF8.GetBytes(body);
+                        request.ContentLength = dataBuffer.Length;
+
+                        using (System.IO.Stream dataStream = request.GetRequestStream())
+                        {
+                            dataStream.Write(dataBuffer, 0, dataBuffer.Length);
+                        }
+
                         break;
                     case RequestType.Delete:
                         break;
                     case RequestType.Auth:
-
-
                         break;
                 }
-
-                HttpWebRequest request = WebRequest.Create(requestUrl) as HttpWebRequest;
-
-                request.Headers.Add("Client-ID: a13o59im5mfpi5y8afoc3jer8vidva0");
 
                 using (HttpWebResponse response = request.GetResponse() as HttpWebResponse)
                 {

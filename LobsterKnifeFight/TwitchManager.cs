@@ -22,18 +22,10 @@ using System.Threading.Tasks;
 
 namespace LivestreamBuddy
 {
-    public class UserManager : TwitchManager<User>
+    public abstract class TwitchManager<T>
     {
-        private TwitchRequest twitchRequest;
+        protected TwitchRequest twitchRequest;
 
-        public UserManager()
-        {
-            twitchRequest = new TwitchRequest("oauth2/token");
-        }
-
-        public override string ToJson(User user)
-        {
-            throw new NotImplementedException();
-        }
+        public abstract string ToJson(T twitchObject);
     }
 }

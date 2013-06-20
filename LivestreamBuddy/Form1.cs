@@ -38,6 +38,9 @@ namespace LivestreamBuddy
         private List<string> giveawayExcludeList;
         private object messagesLock;
         private Queue<string> messages;
+        private Dictionary<string, Color> nicknameColors;
+        private Color[] potentialNicknameColors;
+        private int lastColorUsed;
         private StartupInfo startInfo;
         private User user;
         private int lastChannelSync;
@@ -62,6 +65,12 @@ namespace LivestreamBuddy
             giveawayExcludeList = new List<string>();
             messagesLock = new object();
             messages = new Queue<string>();
+            nicknameColors = new Dictionary<string, Color>();
+            potentialNicknameColors = new Color[] {Color.Blue, Color.Red, Color.Green, Color.Purple, 
+                Color.Pink, Color.Brown, Color.CornflowerBlue, Color.Aquamarine, Color.Maroon, Color.LightGreen, Color.Indigo, Color.HotPink, Color.Chocolate, 
+                Color.DarkSlateGray, Color.Turquoise, Color.IndianRed, Color.Orange, Color.LimeGreen, 
+                Color.Lavender, Color.DeepPink, Color.BurlyWood, Color.Crimson, Color.MintCream};
+            lastColorUsed = -1;
             user = new User();
             lastChannelSync = Environment.TickCount;
             shouldListenThreadStop = false;
@@ -69,9 +78,26 @@ namespace LivestreamBuddy
 
         private void messagesWriteLine(string line)
         {
-            txtMessages.Text += line + Environment.NewLine;
+            messagesWriteLine(line, true, Color.Black);
+        }
+
+        private void messagesWriteLine(string line, bool isChatMessage, System.Drawing.Color color)
+        {
+            int length = txtMessages.TextLength;
+
+            txtMessages.AppendText(line + Environment.NewLine);
             txtMessages.SelectionStart = txtMessages.Text.Length;
             txtMessages.ScrollToCaret();
+
+            int separatorIndex = line.IndexOf(':');
+            if (isChatMessage && separatorIndex > -1)
+            {
+                txtMessages.SelectionStart = length;
+                txtMessages.SelectionLength = separatorIndex + 1;
+                txtMessages.SelectionColor = color;
+                txtMessages.SelectionFont = new Font(txtMessages.SelectionFont.FontFamily, txtMessages.SelectionFont.Size, FontStyle.Bold);
+                txtMessages.SelectionLength = 0;
+            }
         }
 
         private int reportWorkerProgressForViewerList(IrcClient client, string channelName)
@@ -81,6 +107,31 @@ namespace LivestreamBuddy
             worker.ReportProgress(0, new ProgressReport(ProgressReportType.GetViewers, channel.Users));
 
             return channel.Users.Count;
+        }
+
+        private void updateChannelInfo()
+        {
+            LivestreamBuddy.StreamManager streamManager = new StreamManager();
+            LivestreamBuddy.Stream stream = streamManager.GetStream(txtChannel.Text);
+
+            if (stream.IsOnline)
+            {
+                txtStreamTitle.Text = stream.Channel.Title;
+                txtStreamGame.Text = stream.Game;
+                lblViewerCount.Text = "Viewer Count: " + stream.ViewerCount;
+            }
+        }
+
+        private Color getNextColor()
+        {
+            lastColorUsed++;
+
+            if (lastColorUsed > (potentialNicknameColors.Length - 1))
+            {
+                lastColorUsed = 0;
+            }
+
+            return potentialNicknameColors[lastColorUsed];
         }
 
         # region Events
@@ -108,7 +159,7 @@ namespace LivestreamBuddy
                     txtMessages.Clear();
                     btnConnect.Enabled = false;
                     shouldListenThreadStop = false;
-                    messagesWriteLine("Connecting...");
+                    messagesWriteLine("Connecting...", false, Color.Black);
                     worker.RunWorkerAsync(new StartupInfo(txtUsername.Text, txtPassword.Text, txtChannel.Text));
                 }
             }
@@ -172,17 +223,17 @@ namespace LivestreamBuddy
             switch (info.Type)
             {
                 case ProgressReportType.Connect:
-                    messagesWriteLine("Connected!");
-                    messagesWriteLine("Logging in...");
+                    messagesWriteLine("Connected!", false, Color.Black);
+                    messagesWriteLine("Logging in...", false, Color.Black);
 
                     break;
                 case ProgressReportType.Login:
-                    messagesWriteLine("Logged in!");
-                    messagesWriteLine("Joining channel " + txtChannel.Text + "...");
+                    messagesWriteLine("Logged in!", false, Color.Black);
+                    messagesWriteLine("Joining channel " + txtChannel.Text + "...", false, Color.Black);
 
                     break;
                 case ProgressReportType.ChannelJoin:
-                    messagesWriteLine("Channel joined!");
+                    messagesWriteLine("Channel joined!", false, Color.Black);
                     Thread.Sleep(75);
                     txtMessages.Clear();
                     lstViewers.Items.Add("Getting viewer list...");
@@ -193,30 +244,13 @@ namespace LivestreamBuddy
                     txtPassword.Enabled = false;
                     txtChannel.Enabled = false;
 
-                    if (string.Compare(txtUsername.Text, txtChannel.Text, StringComparison.OrdinalIgnoreCase) == 0)
-                    {
-                        user.UserId = txtUsername.Text;
-                        user.Password = txtPassword.Text;
-                        user.Scope = UserScope.ChannelEditor;
-
-                        AuthForm bob = new AuthForm(user);
-                        bob.ShowDialog(this);
-
-                        if (!string.IsNullOrEmpty(user.AccessToken))
-                        {
-                            txtStreamTitle.ReadOnly = false;
-                            txtStreamGame.ReadOnly = false;
-                            //btnStreamUpdate.Enabled = true;
-                        }
-                    }
-
                     break;
                 case ProgressReportType.Error:
-                    messagesWriteLine((string)info.Data);
+                    messagesWriteLine((string)info.Data, false, Color.Black);
 
                     break;
                 case ProgressReportType.Message:
-                    messagesWriteLine((string)info.Data);
+                    messagesWriteLine((string)info.Data, true, info.MessageColor);
 
                     break;
                 case ProgressReportType.GetViewers:
@@ -239,15 +273,7 @@ namespace LivestreamBuddy
 
                     break;
                 case ProgressReportType.UpdateChannelInfo:
-                    LivestreamBuddy.StreamManager streamManager = new StreamManager();
-                    LivestreamBuddy.Stream stream = streamManager.GetStream(txtChannel.Text);
-
-                    if (stream.IsOnline)
-                    {
-                        txtStreamTitle.Text = stream.Channel.Title;
-                        txtStreamGame.Text = stream.Game;
-                        lblViewerCount.Text = "Viewer Count: " + stream.ViewerCount;
-                    }
+                    updateChannelInfo();
 
                     break;
             }
@@ -262,15 +288,11 @@ namespace LivestreamBuddy
             btnConnect.Enabled = true;
             btnConnect.Text = "Connect";
 
-            txtStreamTitle.Clear();
-            txtStreamGame.Clear();
-            txtStreamTitle.ReadOnly = true;
-            txtStreamGame.ReadOnly = true;
-            btnStreamUpdate.Enabled = false;
-
             txtMessages.Clear();
             lblViewerCount.Text = "Viewer Count:";
             lstViewers.Items.Clear();
+            nicknameColors.Clear();
+            lastColorUsed = -1;
         }
 
         void client_OnConnected(object sender, EventArgs e)
@@ -367,8 +389,25 @@ namespace LivestreamBuddy
 
         void client_OnChannelMessage(object sender, IrcEventArgs e)
         {
+            Color nickColor = Color.Black;
+
+            if (nicknameColors.ContainsKey(e.Data.Nick))
+            {
+                nickColor = nicknameColors[e.Data.Nick];
+            }
+            else
+            {
+                nickColor = getNextColor();
+                nicknameColors.Add(e.Data.Nick, nickColor);
+            }
+
             string message = e.Data.Nick + ": " + e.Data.Message;
-            worker.ReportProgress(0, new ProgressReport(ProgressReportType.Message, message));
+            worker.ReportProgress(0, new ProgressReport()
+            {
+                Type = ProgressReportType.Message, 
+                Data = message, 
+                MessageColor = nickColor
+            });
 
             if (e.Data.Message.ToLower() == "bobtart")
             {
@@ -378,7 +417,7 @@ namespace LivestreamBuddy
 
         void client_OnError(object sender, Meebey.SmartIrc4net.ErrorEventArgs e)
         {
-            worker.ReportProgress(0, new ProgressReport(ProgressReportType.Error, e.ErrorMessage));
+            worker.ReportProgress(0, new ProgressReport(ProgressReportType.Error, Environment.NewLine + e.ErrorMessage + Environment.NewLine));
         }
 
         void client_OnChannelActiveSynced(object sender, IrcEventArgs e)
@@ -399,6 +438,90 @@ namespace LivestreamBuddy
         void client_OnQuit(object sender, QuitEventArgs e)
         {
             reportWorkerProgressForViewerList(sender as IrcClient, e.Data.Channel);
+        }
+
+        private void txtUsername_TextChanged(object sender, EventArgs e)
+        {
+            if (string.Compare(txtUsername.Text, txtChannel.Text, StringComparison.OrdinalIgnoreCase) == 0)
+            {
+                txtStreamTitle.ReadOnly = false;
+                txtStreamGame.ReadOnly = false;
+                btnStreamUpdate.Enabled = true;
+            }
+            else
+            {
+                txtStreamTitle.ReadOnly = true;
+                txtStreamGame.ReadOnly = true;
+                btnStreamUpdate.Enabled = false;
+            }
+        }
+
+        private void txtChannel_TextChanged(object sender, EventArgs e)
+        {
+            if (string.Compare(txtUsername.Text, txtChannel.Text, StringComparison.OrdinalIgnoreCase) == 0)
+            {
+                txtStreamTitle.ReadOnly = false;
+                txtStreamGame.ReadOnly = false;
+                btnStreamUpdate.Enabled = true;
+            }
+            else
+            {
+                txtStreamTitle.ReadOnly = true;
+                txtStreamGame.ReadOnly = true;
+                btnStreamUpdate.Enabled = false;
+            }
+        }
+
+        private void btnStreamUpdate_Click(object sender, EventArgs e)
+        {
+            LivestreamBuddy.ChannelManager channelManager = new ChannelManager();
+            LivestreamBuddy.Channel channel = new Channel()
+            {
+                Title = txtStreamTitle.Text,
+                CurrentStream = new Stream()
+                {
+                    Game = txtStreamGame.Text
+                }
+            };
+
+            user.UserId = txtUsername.Text;
+            user.Password = txtPassword.Text;
+            user.Scope = UserScope.ChannelEditor;
+
+            if (string.IsNullOrEmpty(user.AccessToken))
+            {
+                AuthForm bob = new AuthForm(user);
+                bob.ShowDialog(this);
+            }
+
+            try
+            {
+                channelManager.UpdateChannel(user, channel);
+                MessageBox.Show("Update successful.");
+            }
+            catch
+            {
+                MessageBox.Show("Update failed.");
+            }
+        }
+
+        private void lblViewerCount_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            if (worker.IsBusy)
+            {
+                updateChannelInfo();
+            }
+        }
+
+        private void btnHelp_Click(object sender, EventArgs e)
+        {
+            ProcessStartInfo sInfo = new ProcessStartInfo("help.html");
+            Process.Start(sInfo);
+        }
+
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            worker.CancelAsync();
         }
 
         # endregion
@@ -427,6 +550,8 @@ namespace LivestreamBuddy
         public ProgressReportType Type { get; set; }
 
         public object Data { get; set; }
+
+        public Color MessageColor { get; set; }
 
         public ProgressReport() { }
 
