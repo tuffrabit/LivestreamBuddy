@@ -35,6 +35,8 @@ namespace LivestreamBuddy
         public AuthForm()
         {
             InitializeComponent();
+
+            Gecko.Xpcom.Initialize("xulrunner");
         }
 
         public AuthForm(User user) : this()
@@ -43,22 +45,27 @@ namespace LivestreamBuddy
             string userScope = EnumHelper.GetUserScope(user.Scope);
             url = "https://api.twitch.tv/kraken/oauth2/authorize?response_type=token&client_id=a13o59im5mfpi5y8afoc3jer8vidva0&redirect_uri=http://www.google.com&scope=" + userScope;
 
+            webBrowser.HandleCreated += webBrowser_HandleCreated;
+        }
+
+        void webBrowser_HandleCreated(object sender, EventArgs e)
+        {
             webBrowser.Navigate(url);
             webBrowser.Navigated += webBrowser_Navigated;
         }
 
-        void webBrowser_Navigated(object sender, WebBrowserNavigatedEventArgs e)
+        void webBrowser_Navigated(object sender, Gecko.GeckoNavigatedEventArgs e)
         {
-            if (!string.IsNullOrEmpty(e.Url.Fragment))
+            if (!string.IsNullOrEmpty(e.Uri.Fragment))
             {
-                int keyIndex = e.Url.Fragment.IndexOf("access_token=");
+                int keyIndex = e.Uri.Fragment.IndexOf("access_token=");
 
                 if (keyIndex > -1)
                 {
-                    int endIndex = e.Url.Fragment.IndexOf('&', keyIndex) - 14;
+                    int endIndex = e.Uri.Fragment.IndexOf('&', keyIndex) - 14;
 
                     keyIndex += 13;
-                    user.AccessToken = e.Url.Fragment.Substring(keyIndex, endIndex);
+                    user.AccessToken = e.Uri.Fragment.Substring(keyIndex, endIndex);
 
                     this.Close();
                 }

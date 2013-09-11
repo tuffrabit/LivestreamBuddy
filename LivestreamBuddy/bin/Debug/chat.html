@@ -1,0 +1,44 @@
+﻿<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <title>Livestream Buddy Chat</title>
+    <style>
+        .pnlChat
+        {
+            position: absolute;
+            left: 1px;
+            top: 1px;
+            overflow-y: auto;
+            padding: 3px 3px 3px 3px;
+        }
+
+        .pnlChat div
+        {
+            font: .9em calibri;
+            margin: 4px 4px 4px 4px;
+        }
+    </style>
+    <script type="text/javascript">
+        function pnlChat_Resize(width, height) {
+            var pnlChat = document.getElementById("pnlChat");
+
+            pnlChat.style.width = width + "px";
+            pnlChat.style.maxWidth = width + "px";
+            pnlChat.style.height = height + "px";
+            pnlChat.style.maxHeight = height + "px";
+        }
+
+        function pnlChat_ScrollToBottom() {
+            var pnlChat = document.getElementById("pnlChat");
+
+            pnlChat.scrollTop = pnlChat.scrollHeight;
+        }
+    </script>
+</head>
+<body id="body">
+    <button id="doStuff" style="display:none;"></button>
+    <div id="pnlChat" class="pnlChat"></div>
+</body>
+</html>

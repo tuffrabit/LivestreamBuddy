@@ -38,19 +38,21 @@
             this.lblChannel = new System.Windows.Forms.Label();
             this.lstViewers = new System.Windows.Forms.ListBox();
             this.grpSetup = new System.Windows.Forms.GroupBox();
+            this.btnHelp = new System.Windows.Forms.Button();
             this.btnConnect = new System.Windows.Forms.Button();
             this.btnGiveaway = new System.Windows.Forms.Button();
             this.txtMessage = new System.Windows.Forms.TextBox();
             this.toolTip = new System.Windows.Forms.ToolTip(this.components);
             this.txtStreamTitle = new System.Windows.Forms.TextBox();
             this.txtStreamGame = new System.Windows.Forms.TextBox();
+            this.lblViewerCount = new System.Windows.Forms.LinkLabel();
             this.grpChannelInfo = new System.Windows.Forms.GroupBox();
+            this.cmbCommercialLength = new System.Windows.Forms.ComboBox();
+            this.btnRunCommercial = new System.Windows.Forms.Button();
             this.btnStreamUpdate = new System.Windows.Forms.Button();
             this.lblStreamTitle = new System.Windows.Forms.Label();
             this.lblStreamGame = new System.Windows.Forms.Label();
-            this.lblViewerCount = new System.Windows.Forms.LinkLabel();
-            this.btnHelp = new System.Windows.Forms.Button();
-            this.txtMessages = new System.Windows.Forms.RichTextBox();
+            this.geckoMainOutput = new Gecko.GeckoWebBrowser();
             this.grpSetup.SuspendLayout();
             this.grpChannelInfo.SuspendLayout();
             this.SuspendLayout();
@@ -138,6 +140,17 @@
             this.grpSetup.TabStop = false;
             this.grpSetup.Text = "Setup";
             // 
+            // btnHelp
+            // 
+            this.btnHelp.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnHelp.Location = new System.Drawing.Point(370, 95);
+            this.btnHelp.Name = "btnHelp";
+            this.btnHelp.Size = new System.Drawing.Size(125, 23);
+            this.btnHelp.TabIndex = 6;
+            this.btnHelp.Text = "Help";
+            this.btnHelp.UseVisualStyleBackColor = true;
+            this.btnHelp.Click += new System.EventHandler(this.btnHelp_Click);
+            // 
             // btnConnect
             // 
             this.btnConnect.Location = new System.Drawing.Point(13, 95);
@@ -186,8 +199,25 @@
             this.toolTip.SetToolTip(this.txtStreamGame, "Game of the current stream.  You will be able to edit this if you have authentica" +
         "ted with Twitch.");
             // 
+            // lblViewerCount
+            // 
+            this.lblViewerCount.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.lblViewerCount.AutoSize = true;
+            this.lblViewerCount.Location = new System.Drawing.Point(383, 262);
+            this.lblViewerCount.Name = "lblViewerCount";
+            this.lblViewerCount.Size = new System.Drawing.Size(73, 13);
+            this.lblViewerCount.TabIndex = 5;
+            this.lblViewerCount.TabStop = true;
+            this.lblViewerCount.Text = "Viewer Count:";
+            this.toolTip.SetToolTip(this.lblViewerCount, "This count is pulled from Twitch.  It is possible for this to be 0 and still have" +
+        " a viewer list.  The viewer list is pulled from IRC not from Twitch.  Click to f" +
+        "orce an update (may take a moment).");
+            this.lblViewerCount.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lblViewerCount_LinkClicked);
+            // 
             // grpChannelInfo
             // 
+            this.grpChannelInfo.Controls.Add(this.cmbCommercialLength);
+            this.grpChannelInfo.Controls.Add(this.btnRunCommercial);
             this.grpChannelInfo.Controls.Add(this.btnStreamUpdate);
             this.grpChannelInfo.Controls.Add(this.btnGiveaway);
             this.grpChannelInfo.Controls.Add(this.lblStreamTitle);
@@ -202,6 +232,30 @@
             this.grpChannelInfo.TabIndex = 11;
             this.grpChannelInfo.TabStop = false;
             this.grpChannelInfo.Text = "Channel";
+            // 
+            // cmbCommercialLength
+            // 
+            this.cmbCommercialLength.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbCommercialLength.FormattingEnabled = true;
+            this.cmbCommercialLength.Items.AddRange(new object[] {
+            "30 Seconds",
+            "60 Seconds",
+            "90 Seconds"});
+            this.cmbCommercialLength.Location = new System.Drawing.Point(432, 22);
+            this.cmbCommercialLength.Name = "cmbCommercialLength";
+            this.cmbCommercialLength.Size = new System.Drawing.Size(121, 21);
+            this.cmbCommercialLength.TabIndex = 9;
+            // 
+            // btnRunCommercial
+            // 
+            this.btnRunCommercial.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnRunCommercial.Location = new System.Drawing.Point(300, 21);
+            this.btnRunCommercial.Name = "btnRunCommercial";
+            this.btnRunCommercial.Size = new System.Drawing.Size(125, 23);
+            this.btnRunCommercial.TabIndex = 8;
+            this.btnRunCommercial.Text = "Run commercial for";
+            this.btnRunCommercial.UseVisualStyleBackColor = true;
+            this.btnRunCommercial.Click += new System.EventHandler(this.btnRunCommercial_Click);
             // 
             // btnStreamUpdate
             // 
@@ -231,51 +285,23 @@
             this.lblStreamGame.TabIndex = 3;
             this.lblStreamGame.Text = "Game:";
             // 
-            // lblViewerCount
+            // geckoMainOutput
             // 
-            this.lblViewerCount.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.lblViewerCount.AutoSize = true;
-            this.lblViewerCount.Location = new System.Drawing.Point(383, 262);
-            this.lblViewerCount.Name = "lblViewerCount";
-            this.lblViewerCount.Size = new System.Drawing.Size(73, 13);
-            this.lblViewerCount.TabIndex = 5;
-            this.lblViewerCount.TabStop = true;
-            this.lblViewerCount.Text = "Viewer Count:";
-            this.toolTip.SetToolTip(this.lblViewerCount, "This count is pulled from Twitch.  It is possible for this to be 0 and still have" +
-        " a viewer list.  The viewer list is pulled from IRC not from Twitch.  Click to f" +
-        "orce an update (may take a moment).");
-            this.lblViewerCount.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lblViewerCount_LinkClicked);
-            // 
-            // btnHelp
-            // 
-            this.btnHelp.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnHelp.Location = new System.Drawing.Point(370, 95);
-            this.btnHelp.Name = "btnHelp";
-            this.btnHelp.Size = new System.Drawing.Size(125, 23);
-            this.btnHelp.TabIndex = 6;
-            this.btnHelp.Text = "Help";
-            this.btnHelp.UseVisualStyleBackColor = true;
-            this.btnHelp.Click += new System.EventHandler(this.btnHelp_Click);
-            // 
-            // txtMessages
-            // 
-            this.txtMessages.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            this.geckoMainOutput.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtMessages.Location = new System.Drawing.Point(13, 262);
-            this.txtMessages.Name = "txtMessages";
-            this.txtMessages.ReadOnly = true;
-            this.txtMessages.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Vertical;
-            this.txtMessages.Size = new System.Drawing.Size(364, 322);
-            this.txtMessages.TabIndex = 7;
-            this.txtMessages.Text = "";
+            this.geckoMainOutput.Location = new System.Drawing.Point(16, 262);
+            this.geckoMainOutput.Name = "geckoMainOutput";
+            this.geckoMainOutput.Size = new System.Drawing.Size(361, 322);
+            this.geckoMainOutput.TabIndex = 12;
+            this.geckoMainOutput.UseHttpActivityObserver = false;
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(596, 636);
-            this.Controls.Add(this.txtMessages);
+            this.Controls.Add(this.geckoMainOutput);
             this.Controls.Add(this.lblViewerCount);
             this.Controls.Add(this.grpChannelInfo);
             this.Controls.Add(this.txtMessage);
@@ -286,6 +312,7 @@
             this.Padding = new System.Windows.Forms.Padding(13);
             this.Text = "Livestream Buddy";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
+            this.ResizeEnd += new System.EventHandler(this.Form1_ResizeEnd);
             this.grpSetup.ResumeLayout(false);
             this.grpSetup.PerformLayout();
             this.grpChannelInfo.ResumeLayout(false);
@@ -317,7 +344,9 @@
         private System.Windows.Forms.TextBox txtStreamGame;
         private System.Windows.Forms.LinkLabel lblViewerCount;
         private System.Windows.Forms.Button btnHelp;
-        private System.Windows.Forms.RichTextBox txtMessages;
+        private System.Windows.Forms.ComboBox cmbCommercialLength;
+        private System.Windows.Forms.Button btnRunCommercial;
+        private Gecko.GeckoWebBrowser geckoMainOutput;
 
     }
 }

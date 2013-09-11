@@ -26,6 +26,7 @@ namespace LivestreamBuddy
     {
         Get, 
         Put, 
+        Post, 
         Delete, 
         Auth
     }
@@ -43,5 +44,12 @@ namespace LivestreamBuddy
         ChannelSubscriptions, 
         ChannelCheckSubscription, 
         ChatLogin
+    }
+
+    public enum CommercialLength
+    {
+        ThirtySeconds,
+        SixtySeconds,
+        NinetySeconds
     }
 }

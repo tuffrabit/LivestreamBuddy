@@ -30,24 +30,69 @@ namespace LivestreamBuddy
             twitchRequest = new TwitchRequest("channels");
         }
 
-        public void UpdateChannel(User user, Channel channel)
+        public void UpdateChannel(User user, string channelName, string title, string game)
         {
             if (string.IsNullOrEmpty(user.AccessToken))
             {
                 throw new ArgumentNullException("AccessToken must be present for PUT requests.");
             }
 
-            if (string.IsNullOrEmpty(user.UserId))
+            if (string.IsNullOrEmpty(channelName))
             {
-                throw new ArgumentNullException("UserId must be present for PUT requests.");
+                throw new ArgumentNullException("Channel name must be present for PUT requests.");
             }
 
+            Channel channel = new Channel()
+            {
+                Title = title,
+                CurrentStream = new Stream()
+                {
+                    Game = game
+                }
+            };
+
             twitchRequest.AccessToken = user.AccessToken;
-            JObject response = JObject.Parse(twitchRequest.MakeRequest(RequestType.Put, user.UserId, ToJson(channel)));
+            JObject response = JObject.Parse(twitchRequest.MakeRequest(RequestType.Put, channelName, ToJson(channel)));
 
             if (response["error"] != null)
             {
-                throw new Exception(string.Format("GetStream failed.  Error {0} {1}: {2}", response["status"], response["error"], response["message"]));
+                throw new Exception(string.Format("UpdateChannel failed.  Error {0} {1}: {2}", response["status"], response["error"], response["message"]));
+            }
+        }
+
+        public void RunCommercial(User user, string channelName, CommercialLength commerciallength)
+        {
+            if (string.IsNullOrEmpty(user.AccessToken))
+            {
+                throw new ArgumentNullException("AccessToken must be present for POST requests.");
+            }
+
+            if (string.IsNullOrEmpty(channelName))
+            {
+                throw new ArgumentNullException("Channel name must be present for POST requests.");
+            }
+
+            int length = 60;
+
+            switch (commerciallength)
+            {
+                case CommercialLength.ThirtySeconds:
+                    length = 30;
+                    break;
+                case CommercialLength.SixtySeconds:
+                    length = 60;
+                    break;
+                case CommercialLength.NinetySeconds:
+                    length = 90;
+                    break;
+            }
+
+            twitchRequest.AccessToken = user.AccessToken;
+            JObject response = JObject.Parse(twitchRequest.MakeRequest(RequestType.Post, channelName + "/commercial", "length=" + length.ToString()));
+
+            if (response["error"] != null)
+            {
+                throw new Exception(string.Format("RunCommercial failed.  Error {0} {1}: {2}", response["status"], response["error"], response["message"]));
             }
         }
 

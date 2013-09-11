@@ -40,6 +40,17 @@ namespace LivestreamBuddy
             RequestDomain = requestDomain;
         }
 
+        private void writeDataToRequest(ref HttpWebRequest request, string data)
+        {
+            byte[] dataBuffer = System.Text.Encoding.UTF8.GetBytes(data);
+            request.ContentLength = dataBuffer.Length;
+
+            using (System.IO.Stream dataStream = request.GetRequestStream())
+            {
+                dataStream.Write(dataBuffer, 0, dataBuffer.Length);
+            }
+        }
+
         public string MakeRequest(RequestType requestType, string data, string body)
         {
             string returnValue = null;
@@ -70,6 +81,13 @@ namespace LivestreamBuddy
                         {
                             dataStream.Write(dataBuffer, 0, dataBuffer.Length);
                         }
+
+                        break;
+                    case RequestType.Post:
+                        request.Headers.Add("Authorization: OAuth " + AccessToken);
+                        request.Method = "POST";
+
+                        writeDataToRequest(ref request, body);
 
                         break;
                     case RequestType.Delete:

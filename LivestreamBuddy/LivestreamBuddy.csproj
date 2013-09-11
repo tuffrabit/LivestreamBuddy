@@ -32,6 +32,12 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Geckofx-Core">
+      <HintPath>..\..\..\..\..\Downloads\GeckoFx-Windows-22.0-0.3\Geckofx-Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Geckofx-Winforms">
+      <HintPath>..\..\..\..\..\Downloads\GeckoFx-Windows-22.0-0.3\Geckofx-Winforms.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -119,9 +125,12 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="chat.html" />
+    <Content Include="GameAutoComplete.txt" />
     <Content Include="help.html" />
     <Content Include="License.txt" />
     <Content Include="livestream-ICON.ico" />
+    <Content Include="README.txt" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\LobsterKnifeFight\LobsterKnifeFight.csproj">
@@ -131,7 +140,10 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>xcopy "$(SolutionDir)LivestreamBuddy\help.html" "$(TargetDir)" /Y</PostBuildEvent>
+    <PostBuildEvent>xcopy "$(SolutionDir)LivestreamBuddy\help.html" "$(TargetDir)" /Y
+xcopy "$(SolutionDir)LivestreamBuddy\README.txt" "$(TargetDir)" /Y
+xcopy "$(SolutionDir)LivestreamBuddy\GameAutoComplete.txt" "$(TargetDir)" /Y
+xcopy "$(SolutionDir)LivestreamBuddy\chat.html" "$(TargetDir)" /Y</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

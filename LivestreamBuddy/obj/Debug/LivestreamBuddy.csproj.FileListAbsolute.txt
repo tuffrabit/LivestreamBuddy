@@ -30,3 +30,7 @@ C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\Livestre
 C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\LivestreamBuddy\bin\Debug\Newtonsoft.Json.pdb
 C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\LivestreamBuddy\bin\Debug\Newtonsoft.Json.xml
 C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\LivestreamBuddy\obj\Debug\LivestreamBuddy.AuthForm.resources
+C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\LivestreamBuddy\bin\Debug\Geckofx-Core.dll
+C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\LivestreamBuddy\bin\Debug\Geckofx-Winforms.dll
+C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\LivestreamBuddy\bin\Debug\Geckofx-Core.pdb
+C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\LivestreamBuddy\bin\Debug\Geckofx-Winforms.pdb
