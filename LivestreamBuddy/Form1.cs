@@ -50,11 +50,14 @@ namespace LivestreamBuddy
         private volatile bool shouldListenThreadStop;
         private string[] titleAutoCompleteStrings;
         private string[] gameAutoCompleteStrings;
+        private string[] channelAutoCompleteStrings;
         private string currentPath = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
         private Regex urlRegex = new Regex(@"(?i)\b((?:[a-z][\w-]+:(?:/{1,3}|[a-z0-9%])|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'.,<>?«»“”‘’]))");
+        private bool isPreviewOpen = false;
 
         private const string titleAutoCompleteFileName = "TitleAutoComplete.txt";
         private const string gameAutoCompleteFileName = "GameAutoComplete.txt";
+        private const string channelAutoCompleteFileName = "ChannelAutoComplete.txt";
 
         public Form1()
         {
@@ -97,7 +100,13 @@ namespace LivestreamBuddy
 
             titleAutoCompleteStrings = getAutoCompleteStrings(titleAutoCompleteFileName);
             gameAutoCompleteStrings = getAutoCompleteStrings(gameAutoCompleteFileName);
+            channelAutoCompleteStrings = getAutoCompleteStrings(channelAutoCompleteFileName);
             updateStreamAutoCompleteFields();
+
+            foreach (Identity identity in Identity.GetAllByName())
+            {
+                cmbIdentities.Items.Add(identity);
+            }
         }
 
         private void updateStreamAutoCompleteFields()
@@ -109,6 +118,10 @@ namespace LivestreamBuddy
             txtStreamGame.AutoCompleteCustomSource = getAutoCompleteSource(gameAutoCompleteFileName);
             txtStreamGame.AutoCompleteMode = AutoCompleteMode.Suggest;
             txtStreamGame.AutoCompleteSource = AutoCompleteSource.CustomSource;
+
+            txtChannel.AutoCompleteCustomSource = getAutoCompleteSource(channelAutoCompleteFileName);
+            txtChannel.AutoCompleteMode = AutoCompleteMode.Suggest;
+            txtChannel.AutoCompleteSource = AutoCompleteSource.CustomSource;
         }
 
         private void clearMessages()
@@ -350,6 +363,10 @@ namespace LivestreamBuddy
             {
                 source.AddRange(gameAutoCompleteStrings);
             }
+            else if (fileName == channelAutoCompleteFileName)
+            {
+                source.AddRange(channelAutoCompleteStrings);
+            }
 
             return source;
         }
@@ -365,6 +382,10 @@ namespace LivestreamBuddy
             else if (fileName == gameAutoCompleteFileName)
             {
                 strings = gameAutoCompleteStrings;
+            }
+            else if (fileName == channelAutoCompleteFileName)
+            {
+                strings = channelAutoCompleteStrings;
             }
 
             bool alreadyExists = false;
@@ -424,13 +445,9 @@ namespace LivestreamBuddy
         {
             if (btnConnect.Text.ToLower() == "connect")
             {
-                if (string.IsNullOrEmpty(txtUsername.Text))
+                if (cmbIdentities.SelectedItem == null)
                 {
-                    MessageBox.Show("You must provide a username.");
-                }
-                else if (string.IsNullOrEmpty(txtPassword.Text))
-                {
-                    MessageBox.Show("You must provide a password.");
+                    MessageBox.Show("You must select an identity.");
                 }
                 else if (string.IsNullOrEmpty(txtChannel.Text))
                 {
@@ -438,13 +455,14 @@ namespace LivestreamBuddy
                 }
                 else
                 {
+                    Identity identity = (Identity)cmbIdentities.SelectedItem;
                     giveawayExcludeList.Clear();
                     lstViewers.Items.Clear();
                     clearMessages();
                     btnConnect.Enabled = false;
                     shouldListenThreadStop = false;
                     messagesWriteLine("Connecting...");
-                    worker.RunWorkerAsync(new StartupInfo(txtUsername.Text, txtPassword.Text, txtChannel.Text));
+                    worker.RunWorkerAsync(new StartupInfo(identity.Name, identity.Password, txtChannel.Text));
                 }
             }
             else if (btnConnect.Text.ToLower() == "disconnect")
@@ -511,6 +529,10 @@ namespace LivestreamBuddy
                     messagesWriteLine("Connected!");
                     messagesWriteLine("Logging in...");
 
+                    addStringToAutoComplete(channelAutoCompleteFileName, txtChannel.Text);
+                    channelAutoCompleteStrings = getAutoCompleteStrings(channelAutoCompleteFileName);
+                    updateStreamAutoCompleteFields();
+
                     break;
                 case ProgressReportType.Login:
                     messagesWriteLine("Logged in!");
@@ -525,8 +547,8 @@ namespace LivestreamBuddy
                     btnConnect.Enabled = true;
                     btnConnect.Text = "Disconnect";
                     btnGiveaway.Enabled = true;
-                    txtUsername.Enabled = false;
-                    txtPassword.Enabled = false;
+                    cmbIdentities.Enabled = false;
+                    btnAddIdentity.Enabled = false;
                     txtChannel.Enabled = false;
 
                     break;
@@ -566,8 +588,8 @@ namespace LivestreamBuddy
 
         void worker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            txtUsername.Enabled = true;
-            txtPassword.Enabled = true;
+            cmbIdentities.Enabled = true;
+            btnAddIdentity.Enabled = true;
             txtChannel.Enabled = true;
             btnGiveaway.Enabled = false;
             btnConnect.Enabled = true;
@@ -739,8 +761,18 @@ namespace LivestreamBuddy
                 txtStreamTitle.ReadOnly = false;
                 txtStreamGame.ReadOnly = false;
                 btnStreamUpdate.Enabled = true;
+                btnViewStream.Enabled = true;
                 btnRunCommercial.Enabled = true;
                 cmbCommercialLength.Enabled = true;
+            }
+            else
+            {
+                txtStreamTitle.ReadOnly = true;
+                txtStreamGame.ReadOnly = true;
+                btnStreamUpdate.Enabled = false;
+                btnViewStream.Enabled = false;
+                btnRunCommercial.Enabled = false;
+                cmbCommercialLength.Enabled = false;
             }
         }
 
@@ -759,19 +791,25 @@ namespace LivestreamBuddy
             {
                 channelManager.UpdateChannel(user, txtChannel.Text, txtStreamTitle.Text, txtStreamGame.Text);
                 MessageBox.Show("Update successful.");
-
-                addStringToAutoComplete(titleAutoCompleteFileName, txtStreamTitle.Text);
-                addStringToAutoComplete(gameAutoCompleteFileName, txtStreamGame.Text);
-
-                titleAutoCompleteStrings = getAutoCompleteStrings(titleAutoCompleteFileName);
-                gameAutoCompleteStrings = getAutoCompleteStrings(gameAutoCompleteFileName);
-
-                updateStreamAutoCompleteFields();
             }
             catch
             {
                 MessageBox.Show("Update failed.");
             }
+
+            try
+            {
+                addStringToAutoComplete(titleAutoCompleteFileName, txtStreamTitle.Text);
+                addStringToAutoComplete(gameAutoCompleteFileName, txtStreamGame.Text);
+                addStringToAutoComplete(channelAutoCompleteFileName, txtChannel.Text);
+
+                titleAutoCompleteStrings = getAutoCompleteStrings(titleAutoCompleteFileName);
+                gameAutoCompleteStrings = getAutoCompleteStrings(gameAutoCompleteFileName);
+                channelAutoCompleteStrings = getAutoCompleteStrings(channelAutoCompleteFileName);
+
+                updateStreamAutoCompleteFields();
+            }
+            catch { }
         }
 
         private void lblViewerCount_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
@@ -833,6 +871,39 @@ namespace LivestreamBuddy
         private void Form1_ResizeEnd(object sender, EventArgs e)
         {
             resizeOutputPanel();
+        }
+
+        private void btnViewStream_Click(object sender, EventArgs e)
+        {
+            if (!isPreviewOpen)
+            {
+                frmStreamPreview viewStream = new frmStreamPreview(txtChannel.Text);
+
+                isPreviewOpen = true;
+                viewStream.Show(this);
+                viewStream.FormClosed += viewStream_FormClosed;
+
+                addStringToAutoComplete(channelAutoCompleteFileName, txtChannel.Text);
+                channelAutoCompleteStrings = getAutoCompleteStrings(channelAutoCompleteFileName);
+                updateStreamAutoCompleteFields();
+            }
+        }
+
+        void viewStream_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            isPreviewOpen = false;
+        }
+
+        private void btnAddIdentity_Click(object sender, EventArgs e)
+        {
+            IdentityForm identityForm = new IdentityForm();
+            identityForm.ShowDialog(this);
+
+            cmbIdentities.Items.Clear();
+            foreach (Identity identity in Identity.GetAllByName())
+            {
+                cmbIdentities.Items.Add(identity);
+            }
         }
 
         # endregion

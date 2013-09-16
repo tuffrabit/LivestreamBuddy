@@ -30,8 +30,9 @@ C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\Livestre
 C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\LivestreamBuddy\bin\Release\Newtonsoft.Json.pdb
 C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\LivestreamBuddy\bin\Release\Newtonsoft.Json.xml
 C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\LivestreamBuddy\obj\Release\LivestreamBuddy.AuthForm.resources
-C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\LivestreamBuddy\bin\Release\Skybound.Gecko.dll
 C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\LivestreamBuddy\bin\Release\Geckofx-Core.dll
 C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\LivestreamBuddy\bin\Release\Geckofx-Winforms.dll
 C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\LivestreamBuddy\bin\Release\Geckofx-Core.pdb
 C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\LivestreamBuddy\bin\Release\Geckofx-Winforms.pdb
+C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\LivestreamBuddy\obj\Release\LivestreamBuddy.frmStreamPreview.resources
+C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\LivestreamBuddy\obj\Release\LivestreamBuddy.IdentityForm.resources

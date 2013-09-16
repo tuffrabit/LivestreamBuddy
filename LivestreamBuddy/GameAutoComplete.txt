@@ -22,6 +22,7 @@ Dead Space 3
 Dead Space Extraction
 Dead Space Ignition
 Diablo 3
+Dishonored
 Dofus
 Dota 2
 F.E.A.R.: First Encounter Assault Recon
@@ -39,6 +40,14 @@ League of Legends
 M.U.G.E.N
 Minecraft
 Payday 2
+Resident Evil
+Resident Evil 2
+Resident Evil 3: Nemisis
+Resident Evil 4
+Resident Evil 5
+Resident Evil 6
+Resident Evil: Revelations
+Resident Evil Zero
 RuneScape
 Smite
 StarCraft II: Heart of the Swarm

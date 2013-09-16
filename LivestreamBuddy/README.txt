@@ -1,5 +1,13 @@
-﻿LivestreamBuddy version 0.5.7 Beta
+﻿LivestreamBuddy version 0.5.8 Beta
 https://sourceforge.net/projects/livestreambuddy/
+
+Changes:
+- Channel field auto suggest
+- Very basic identity manager (replaces the current username and password fields).  This will be expanded in the future.
+- View stream ability
+- No more soul sucking WinForms RTF.  All replaced with custom GeckoFX (embedded firefox) controls.
+
+--- version 0.5.7 Beta ---
 
 Changes:
 - Switched from the built-in .Net WebBrowser control to GeckoFx.  Yields lower memory usage and behaves better with the Twitch Web API.

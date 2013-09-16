@@ -71,6 +71,19 @@
     <Compile Include="frmGiveaway.Designer.cs">
       <DependentUpon>frmGiveaway.cs</DependentUpon>
     </Compile>
+    <Compile Include="frmIdentity.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmIdentity.Designer.cs">
+      <DependentUpon>frmIdentity.cs</DependentUpon>
+    </Compile>
+    <Compile Include="frmStreamPreview.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmStreamPreview.Designer.cs">
+      <DependentUpon>frmStreamPreview.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Identity.cs" />
     <Compile Include="IrcClient\BanInfo.cs" />
     <Compile Include="IrcClient\Channel.cs" />
     <Compile Include="IrcClient\ChannelInfo.cs" />
@@ -101,6 +114,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="frmGiveaway.resx">
       <DependentUpon>frmGiveaway.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmIdentity.resx">
+      <DependentUpon>frmIdentity.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmStreamPreview.resx">
+      <DependentUpon>frmStreamPreview.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

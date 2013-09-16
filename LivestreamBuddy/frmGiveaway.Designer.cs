@@ -29,6 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmGiveaway));
             this.lblExclude = new System.Windows.Forms.Label();
             this.txtExclude = new System.Windows.Forms.TextBox();
             this.btnPick = new System.Windows.Forms.Button();
@@ -97,6 +98,7 @@
             this.Controls.Add(this.txtExclude);
             this.Controls.Add(this.lblExclude);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "frmGiveaway";
             this.Padding = new System.Windows.Forms.Padding(13);
             this.ShowIcon = false;
