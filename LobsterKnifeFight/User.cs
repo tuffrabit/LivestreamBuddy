@@ -24,12 +24,32 @@ namespace LivestreamBuddy
 {
     public class User
     {
-        public string UserId { get; set; }
+        public string Id { get; set; }
+
+        public string Name { get; set; }
 
         public string Password { get; set; }
 
-        public string AccessToken { get; set; }
+        public Dictionary<UserScope, string> AccessTokens { get; set; }
 
-        public UserScope Scope { get; set; }
+        public string GetAccessToken(UserScope scope)
+        {
+            string accessToken = null;
+
+            if (this.AccessTokens != null)
+            {
+                if (this.AccessTokens.ContainsKey(scope))
+                {
+                    accessToken = this.AccessTokens[scope];
+                }
+            }
+
+            return accessToken;
+        }
+
+        public User()
+        {
+            this.AccessTokens = new Dictionary<UserScope, string>();
+        }
     }
 }

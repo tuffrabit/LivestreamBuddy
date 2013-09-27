@@ -33,7 +33,7 @@ namespace LivestreamBuddy
         public Emoticon[] GetEmoticons()
         {
             List<Emoticon> emoticons = null;
-            JObject rawChat = JObject.Parse(twitchRequest.MakeRequest(RequestType.Get, "emoticons", null));
+            JObject rawChat = JObject.Parse(twitchRequest.MakeRequest(RequestType.Get, "/emoticons", null));
 
             if (rawChat["error"] != null)
             {
@@ -47,7 +47,7 @@ namespace LivestreamBuddy
                 {
                     emoticons.Add(new Emoticon
                     {
-                        Regex = (string)child["regex"], 
+                        Regex = new System.Text.RegularExpressions.Regex((string)child["regex"], System.Text.RegularExpressions.RegexOptions.Compiled), 
                         //Height = (Int32)child["images"][0]["height"],
                         //Width = (Int32)child["images"][0]["width"],
                         Url = (string)child["images"][0]["url"]

@@ -1,0 +1,14 @@
+﻿<Window x:Class="LivestreamBuddyNew.SingleTextBoxWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="SingleTextBoxWindow" Height="115" Width="350" Icon="livestream-ICON.ico" ResizeMode="NoResize" WindowStartupLocation="CenterOwner">
+    <Border Padding="13 13 13 13">
+        <StackPanel Orientation="Vertical">
+            <StackPanel Orientation="Horizontal" Height="20" Margin="0 0 0 7">
+                <TextBlock Name="lblLabel" Margin="0 0 3 0"></TextBlock>
+                <TextBox Name="txtTextBox"></TextBox>
+            </StackPanel>
+            <Button Name="btnButton" HorizontalAlignment="Center" Click="btnButton_Click" />
+        </StackPanel>
+    </Border>
+</Window>

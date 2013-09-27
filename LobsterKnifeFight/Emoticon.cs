@@ -18,13 +18,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace LivestreamBuddy
 {
     public class Emoticon
     {
-        public string Regex { get; set; }
+        public Regex Regex { get; set; }
 
         public string Url { get; set; }
 

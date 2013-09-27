@@ -1,5 +1,13 @@
-﻿LivestreamBuddy version 0.5.8 Beta
+﻿LivestreamBuddy version 0.5.9 Beta
 https://sourceforge.net/projects/livestreambuddy/
+
+Changes:
+- Chat will now display emoticon images.  This has the potential to be resource intensive on slower machines.  You can disable it by running LivestreamBuddy with the -noemote flag.
+
+Fixes:
+- Stuck on "Joining Chat...".  Twitch changed their IRC authentication process.  LivestreamBuddy now mirrors that change.
+
+--- version 0.5.8 Beta ---
 
 Changes:
 - Channel field auto suggest

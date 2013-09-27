@@ -33,8 +33,8 @@ namespace LivestreamBuddy
 
         public LivestreamBuddy.Stream GetStream(string channelName)
         {
-            LivestreamBuddy.Stream stream = new LivestreamBuddy.Stream();
-            JObject rawStream = JObject.Parse(twitchRequest.MakeRequest(RequestType.Get, channelName, null));
+            LivestreamBuddy.Stream stream = null;
+            JObject rawStream = JObject.Parse(twitchRequest.MakeRequest(RequestType.Get, "/" + channelName, null));
 
             if (rawStream["error"] != null)
             {
@@ -67,6 +67,81 @@ namespace LivestreamBuddy
             }
             
             return stream;
+        }
+
+        /// <summary>
+        /// Returns a list of twitch streams
+        /// </summary>
+        /// <param name="channels">Comma separated list of channels to query</param>
+        /// <returns>A list of twitch streams</returns>
+        public List<LivestreamBuddy.Stream> GetStreams(string channels)
+        {
+            List<LivestreamBuddy.Stream> streams = new List<Stream>();
+            JObject rawStreams = JObject.Parse(twitchRequest.MakeRequest(RequestType.Get, "?channel=" + channels, null));
+
+            if (rawStreams["error"] != null)
+            {
+                throw new Exception(string.Format("GetStreams failed.  Error {0} {1}: {2}", rawStreams["status"], rawStreams["error"], rawStreams["message"]));
+            }
+            else if (rawStreams["streams"] != null && rawStreams["streams"].HasValues)
+            {
+                foreach (JToken child in rawStreams["streams"].ToArray())
+                {
+                    LivestreamBuddy.Stream stream = null;
+
+                    stream = new LivestreamBuddy.Stream
+                    {
+                        IsOnline = true,
+                        Id = (Int64)child["_id"],
+                        Game = (string)child["game"],
+                        ViewerCount = (Int64)child["viewers"],
+                        Channel = new LivestreamBuddy.Channel
+                        {
+                            Id = (Int64)child["channel"]["_id"],
+                            Name = (string)child["channel"]["name"],
+                            Title = (string)child["channel"]["status"]
+                        }
+                    };
+
+                    streams.Add(stream);
+                }
+            }
+
+            return streams;
+        }
+
+        public List<LivestreamBuddy.Stream> GetFeaturedStreams()
+        {
+            List<LivestreamBuddy.Stream> streams = new List<Stream>();
+            JObject rawFeaturedStreams = JObject.Parse(twitchRequest.MakeRequest(RequestType.Get, "/featured", null));
+
+            if (rawFeaturedStreams["error"] != null)
+            {
+                throw new Exception(string.Format("GetFeaturedStreams failed.  Error {0} {1}: {2}", rawFeaturedStreams["status"], rawFeaturedStreams["error"], rawFeaturedStreams["message"]));
+            }
+            else if (rawFeaturedStreams["featured"] != null && rawFeaturedStreams["featured"].HasValues)
+            {
+                foreach (JToken child in rawFeaturedStreams["featured"].ToArray())
+                {
+                    LivestreamBuddy.Stream stream = new LivestreamBuddy.Stream
+                    {
+                        IsOnline = true,
+                        Id = (Int64)child["stream"]["_id"],
+                        Game = (string)child["stream"]["game"],
+                        ViewerCount = (Int64)child["stream"]["viewers"],
+                        Channel = new LivestreamBuddy.Channel
+                        {
+                            Id = (Int64)child["stream"]["channel"]["_id"],
+                            Name = (string)child["stream"]["channel"]["name"],
+                            Title = (string)child["stream"]["channel"]["status"]
+                        }
+                    };
+
+                    streams.Add(stream);
+                }
+            }
+
+            return streams;
         }
 
         public override string ToJson(Stream stream)

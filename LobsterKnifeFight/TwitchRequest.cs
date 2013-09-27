@@ -57,7 +57,7 @@ namespace LivestreamBuddy
 
             if (!string.IsNullOrEmpty(RequestDomain))
             {
-                string requestUrl = string.Format("https://api.twitch.tv/kraken/{0}/{1}", RequestDomain, data);
+                string requestUrl = string.Format("https://api.twitch.tv/kraken/{0}{1}", RequestDomain, data);
                 HttpWebRequest request = WebRequest.Create(requestUrl) as HttpWebRequest;
 
                 request.Accept = "application/vnd.twitchtv.v2+json";

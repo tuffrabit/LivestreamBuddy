@@ -52,12 +52,14 @@ namespace LivestreamBuddy
         private string[] gameAutoCompleteStrings;
         private string[] channelAutoCompleteStrings;
         private string currentPath = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
-        private Regex urlRegex = new Regex(@"(?i)\b((?:[a-z][\w-]+:(?:/{1,3}|[a-z0-9%])|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'.,<>?«»“”‘’]))");
+        private Regex urlRegex = new Regex(@"(?i)\b((?:[a-z][\w-]+:(?:/{1,3}|[a-z0-9%])|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'.,<>?«»“”‘’]))", RegexOptions.Compiled);
         private bool isPreviewOpen = false;
+        private Emoticon[] emoticons = null;
 
         private const string titleAutoCompleteFileName = "TitleAutoComplete.txt";
         private const string gameAutoCompleteFileName = "GameAutoComplete.txt";
         private const string channelAutoCompleteFileName = "ChannelAutoComplete.txt";
+        private const string emoticonsCacheFileName = "Emoticons.txt";
 
         public Form1()
         {
@@ -107,6 +109,76 @@ namespace LivestreamBuddy
             {
                 cmbIdentities.Items.Add(identity);
             }
+
+            bool allowEmoticons = true;
+            bool refreshEmoticons = false;
+            string[] commandLineArgs = Environment.GetCommandLineArgs();
+
+            foreach (string arg in commandLineArgs)
+            {
+                if (string.Compare(arg, "-noemote", StringComparison.OrdinalIgnoreCase) == 0)
+                {
+                    allowEmoticons = false;
+                }
+                else if (string.Compare(arg, "-refreshemoticons", StringComparison.OrdinalIgnoreCase) == 0)
+                {
+                    refreshEmoticons = true;
+                }
+            }
+
+            if (allowEmoticons)
+            {
+                try
+                {
+                    emoticons = getEmoticons(refreshEmoticons);
+                }
+                catch { }
+            }
+        }
+
+        private Emoticon[] getEmoticons(bool refresh = false)
+        {
+            List<Emoticon> emoticons = new List<Emoticon>();
+
+            if (!File.Exists(emoticonsCacheFileName))
+            {
+                using (FileStream fs = File.Create(emoticonsCacheFileName))
+                {
+                    fs.Close();
+                }
+
+                refresh = true;
+            }
+
+            if (refresh)
+            {
+                using (StreamWriter writer = File.CreateText(emoticonsCacheFileName))
+                {
+                    ChatManager chatManager = new ChatManager();
+
+                    foreach (Emoticon emoticon in chatManager.GetEmoticons())
+                    {
+                        writer.WriteLine(emoticon.Regex + "," + emoticon.Url);
+                    }
+                    
+                    writer.Close();
+                }
+            }
+
+            using (StreamReader reader = File.OpenText(emoticonsCacheFileName))
+            {
+                string line;
+                while ((line = reader.ReadLine()) != null)
+                {
+                    string[] parts = line.Split(',');
+
+                    emoticons.Add(new Emoticon { Regex = new Regex(parts[0].Trim(), RegexOptions.Compiled), Url = parts[1].Trim() });
+                }
+
+                reader.Close();
+            }
+
+            return emoticons.ToArray();
         }
 
         private void updateStreamAutoCompleteFields()
@@ -199,6 +271,20 @@ namespace LivestreamBuddy
         private GeckoElement getNewChatLine(string nick, string message, string color)
         {
             GeckoElement newChatLine = null;
+            List<EmoticonMatch> emoticonMatches = new List<EmoticonMatch>();
+
+            if (emoticons != null)
+            {
+                for (int i = 0; i < emoticons.Length; i++)
+                {
+                    Emoticon emoticon = emoticons[i];
+
+                    foreach (Match match in emoticon.Regex.Matches(message))
+                    {
+                        emoticonMatches.Add(new EmoticonMatch(match, emoticon.Url));
+                    }
+                }
+            }
 
             MatchCollection urls = urlRegex.Matches(message);
 
@@ -211,45 +297,96 @@ namespace LivestreamBuddy
                 nameField.SetAttribute("style", "color:" + color + ";font-weight:bold;");
                 nameField.AppendChild(geckoMainOutput.Document.CreateTextNode(nick + ": "));
 
-                if (urls.Count > 0)
+                if (urls.Count > 0 || emoticonMatches.Count > 0)
                 {
+                    int currentEmotIndex = 0;
+                    EmoticonMatch currentEmot = null;
+
+                    if (emoticonMatches.Count > 0)
+                    {
+                        currentEmot = emoticonMatches[currentEmotIndex];
+                    }
+
                     int currentUrlIndex = 0;
-                    Match currentUrl = urls[currentUrlIndex];
+                    Match currentUrl = null;
+
+                    if (urls.Count > 0)
+                    {
+                        currentUrl = urls[currentUrlIndex];
+                    }
+
                     StringBuilder sb = new StringBuilder();
 
                     for (int i = 0; i < message.Length; i++)
                     {
                         char currentChar = message[i];
 
-                        if (currentUrl != null && i == currentUrl.Index)
+                        if ((currentUrl != null && i == currentUrl.Index) || (currentEmot != null && i == currentEmot.Match.Index))
                         {
-                            if (sb.Length > 0)
+                            if (currentUrl != null && i == currentUrl.Index)
                             {
-                                messageField.AppendChild(geckoMainOutput.Document.CreateTextNode(sb.ToString()));
-                                sb.Clear();
+                                string url = currentUrl.Value.ToLower();
+
+                                if (!url.Contains("jtvnw.net") && (!url.EndsWith(".png") &&
+                                !url.EndsWith(".jpg") &&
+                                !url.EndsWith(".jpeg") &&
+                                !url.EndsWith(".gif") &&
+                                !url.EndsWith(".bmp")))
+                                {
+                                    if (sb.Length > 0)
+                                    {
+                                        messageField.AppendChild(geckoMainOutput.Document.CreateTextNode(sb.ToString()));
+                                        sb.Clear();
+                                    }
+
+                                    GeckoElement urlNode = geckoMainOutput.Document.CreateElement("a");
+
+                                    if (!url.StartsWith("http://"))
+                                    {
+                                        url = "http://" + url;
+                                    }
+
+                                    urlNode.SetAttribute("href", url);
+                                    urlNode.AppendChild(geckoMainOutput.Document.CreateTextNode(currentUrl.Value));
+                                    messageField.AppendChild(urlNode);
+
+                                    i = currentUrl.Index + currentUrl.Length - 1;
+                                }
+                                else
+                                {
+                                    if (++currentUrlIndex >= urls.Count)
+                                    {
+                                        currentUrl = null;
+                                    }
+                                    else
+                                    {
+                                        currentUrl = urls[currentUrlIndex];
+                                    }
+                                }
                             }
-
-                            GeckoElement urlNode = geckoMainOutput.Document.CreateElement("a");
-                            string url = currentUrl.Value;
-
-                            if (!url.StartsWith("http://"))
+                            else if (currentEmot != null && i == currentEmot.Match.Index)
                             {
-                                url = "http://" + url;
-                            }
+                                if (sb.Length > 0)
+                                {
+                                    messageField.AppendChild(geckoMainOutput.Document.CreateTextNode(sb.ToString()));
+                                    sb.Clear();
+                                }
 
-                            urlNode.SetAttribute("href", url);
-                            urlNode.AppendChild(geckoMainOutput.Document.CreateTextNode(currentUrl.Value));
-                            messageField.AppendChild(urlNode);
+                                GeckoElement imgNode = geckoMainOutput.Document.CreateElement("img");
 
-                            i = currentUrl.Index + currentUrl.Length - 1;
+                                imgNode.SetAttribute("src", currentEmot.Replacement);
+                                messageField.AppendChild(imgNode);
 
-                            if (++currentUrlIndex >= urls.Count)
-                            {
-                                currentUrl = null;
-                            }
-                            else
-                            {
-                                currentUrl = urls[currentUrlIndex];
+                                i = currentEmot.Match.Index + currentEmot.Match.Length - 1;
+
+                                if (++currentEmotIndex >= emoticonMatches.Count)
+                                {
+                                    currentEmot = null;
+                                }
+                                else
+                                {
+                                    currentEmot = emoticonMatches[currentEmotIndex];
+                                }
                             }
                         }
                         else
@@ -267,8 +404,6 @@ namespace LivestreamBuddy
                 {
                     messageField.AppendChild(geckoMainOutput.Document.CreateTextNode(message));
                 }
-
-                //messageField.AppendChild(geckoMainOutput.Document.CreateTextNode(message));
 
                 newChatLine.AppendChild(nameField);
                 newChatLine.AppendChild(messageField);
@@ -321,6 +456,17 @@ namespace LivestreamBuddy
             objectNode.AppendChild(movieNode);
             objectNode.AppendChild(flashvarsNode);
             pnlChat.AppendChild(objectNode);
+        }
+
+        private void getAccessToken(UserScope scope, bool invalidate = true)
+        {
+            if (invalidate)
+            {
+                user.Scope = scope;
+
+                AuthForm bob = new AuthForm(user);
+                bob.ShowDialog(this);
+            }
         }
 
         # region AutoSuggestSource
@@ -455,6 +601,7 @@ namespace LivestreamBuddy
                 }
                 else
                 {
+                    getAccessToken(UserScope.ChatLogin);
                     Identity identity = (Identity)cmbIdentities.SelectedItem;
                     giveawayExcludeList.Clear();
                     lstViewers.Items.Clear();
@@ -462,7 +609,8 @@ namespace LivestreamBuddy
                     btnConnect.Enabled = false;
                     shouldListenThreadStop = false;
                     messagesWriteLine("Connecting...");
-                    worker.RunWorkerAsync(new StartupInfo(identity.Name, identity.Password, txtChannel.Text));
+                    //worker.RunWorkerAsync(new StartupInfo(identity.Name, identity.Password, txtChannel.Text));
+                    worker.RunWorkerAsync(new StartupInfo(identity.Name, "oauth:" + user.AccessToken, txtChannel.Text));
                 }
             }
             else if (btnConnect.Text.ToLower() == "disconnect")
@@ -953,5 +1101,20 @@ namespace LivestreamBuddy
         UpdateChannelInfo, 
         Error, 
         Query
+    }
+
+    public class EmoticonMatch
+    {
+        public Match Match { get; set; }
+
+        public string Replacement { get; set; }
+
+        public EmoticonMatch() { }
+
+        public EmoticonMatch(Match match, string replacement)
+        {
+            this.Match = match;
+            this.Replacement = replacement;
+        }
     }
 }

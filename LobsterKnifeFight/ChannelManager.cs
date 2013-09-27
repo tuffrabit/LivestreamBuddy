@@ -32,7 +32,7 @@ namespace LivestreamBuddy
 
         public void UpdateChannel(User user, string channelName, string title, string game)
         {
-            if (string.IsNullOrEmpty(user.AccessToken))
+            if (string.IsNullOrEmpty(user.GetAccessToken(UserScope.ChannelEditor)))
             {
                 throw new ArgumentNullException("AccessToken must be present for PUT requests.");
             }
@@ -51,8 +51,8 @@ namespace LivestreamBuddy
                 }
             };
 
-            twitchRequest.AccessToken = user.AccessToken;
-            JObject response = JObject.Parse(twitchRequest.MakeRequest(RequestType.Put, channelName, ToJson(channel)));
+            twitchRequest.AccessToken = user.GetAccessToken(UserScope.ChannelEditor);
+            JObject response = JObject.Parse(twitchRequest.MakeRequest(RequestType.Put, "/" + channelName, ToJson(channel)));
 
             if (response["error"] != null)
             {
@@ -62,7 +62,7 @@ namespace LivestreamBuddy
 
         public void RunCommercial(User user, string channelName, CommercialLength commerciallength)
         {
-            if (string.IsNullOrEmpty(user.AccessToken))
+            if (string.IsNullOrEmpty(user.GetAccessToken(UserScope.ChannelEditor)))
             {
                 throw new ArgumentNullException("AccessToken must be present for POST requests.");
             }
@@ -87,8 +87,8 @@ namespace LivestreamBuddy
                     break;
             }
 
-            twitchRequest.AccessToken = user.AccessToken;
-            JObject response = JObject.Parse(twitchRequest.MakeRequest(RequestType.Post, channelName + "/commercial", "length=" + length.ToString()));
+            twitchRequest.AccessToken = user.GetAccessToken(UserScope.ChannelEditor);
+            JObject response = JObject.Parse(twitchRequest.MakeRequest(RequestType.Post, "/" + channelName + "/commercial", "length=" + length.ToString()));
 
             if (response["error"] != null)
             {
