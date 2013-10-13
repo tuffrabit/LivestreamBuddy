@@ -11,7 +11,7 @@
                 <Button Width="200" Name="btnShowFeaturedStreams" IsEnabled="False" DockPanel.Dock="Left" Click="ShowFeaturedStreamsClick">Show Featured Streams</Button>
                 <Button Width="200" Name="btnShowFollowedStreams" IsEnabled="False" DockPanel.Dock="Right" Click="ShowFollowedStreamsClick">Show Followed Streams</Button>
             </DockPanel>
-            <ContentControl Height="200">
+            <ContentControl Height="400">
                 <DataGrid Name="grdChannels" AlternationCount="2" SelectionMode="Single" SelectionUnit="FullRow" IsReadOnly="True" ItemsSource="{Binding channels,UpdateSourceTrigger=PropertyChanged}" AutoGenerateColumns="False" Margin="0 0 0 7" MouseDoubleClick="grdChannels_MouseDoubleClick" SelectionChanged="grdChannels_SelectionChanged">
                     <DataGrid.RowStyle>
                         <Style TargetType="DataGridRow">
@@ -79,6 +79,7 @@
                 <TextBox Name="txtGoToChannel" />
             </DockPanel>
             <CheckBox Name="chkStreamOpenStyle" IsChecked="True">Open streams in new tab</CheckBox>
+            <CheckBox Name="chkStreamViewShow" IsChecked="True">Show stream feed when opening</CheckBox>
         </StackPanel>
     </Border>
 </UserControl>

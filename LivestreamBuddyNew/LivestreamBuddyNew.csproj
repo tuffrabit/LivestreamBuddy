@@ -186,6 +186,7 @@
     <Content Include="FlatFiles\chat.html" />
     <Content Include="FlatFiles\viewStream.html" />
     <Content Include="Plugins\NPSWF32_11_8_800_94.dll" />
+    <Resource Include="Resources\grayX.png" />
     <Resource Include="Resources\check.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

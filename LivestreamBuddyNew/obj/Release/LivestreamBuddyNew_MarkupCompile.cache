@@ -4,16 +4,16 @@
 winexe
 C#
 .cs
-C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\LivestreamBuddyNew\obj\Release\
+C:\dev\LivestreamBuddy\LivestreamBuddyNew\obj\Release\
 LivestreamBuddyNew
 none
 false
 TRACE
-C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\LivestreamBuddyNew\App.xaml
+C:\dev\LivestreamBuddy\LivestreamBuddyNew\App.xaml
 7-1443494425
 3-1416555135
 161904222955
-21118426994
+21-1365873486
 AuthWindow.xaml;Controls\Channels.xaml;Controls\CloseableHeader.xaml;Controls\Giveaway.xaml;Controls\Stream.xaml;MainWindow.xaml;SingleTextBoxWindow.xaml;
 
 False

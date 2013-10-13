@@ -37,3 +37,40 @@ C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\Livestre
 C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\LivestreamBuddyNew\obj\Release\LivestreamBuddyNew.csproj.GenerateResource.Cache
 C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\LivestreamBuddyNew\obj\Release\LivestreamBuddyNew.exe
 C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\LivestreamBuddyNew\obj\Release\LivestreamBuddyNew.pdb
+C:\dev\LivestreamBuddy\LivestreamBuddyNew\bin\Release\LivestreamBuddyNew.exe.config
+C:\dev\LivestreamBuddy\LivestreamBuddyNew\obj\Release\LivestreamBuddyNew.exe
+C:\dev\LivestreamBuddy\LivestreamBuddyNew\obj\Release\LivestreamBuddyNew.pdb
+C:\dev\LivestreamBuddy\LivestreamBuddyNew\bin\Release\LivestreamBuddyNew.exe
+C:\dev\LivestreamBuddy\LivestreamBuddyNew\bin\Release\LivestreamBuddyNew.pdb
+C:\dev\LivestreamBuddy\LivestreamBuddyNew\bin\Release\LobsterKnifeFight.dll
+C:\dev\LivestreamBuddy\LivestreamBuddyNew\bin\Release\SmartIrc4net.dll
+C:\dev\LivestreamBuddy\LivestreamBuddyNew\bin\Release\Newtonsoft.Json.dll
+C:\dev\LivestreamBuddy\LivestreamBuddyNew\bin\Release\SmartIrc4net.pdb
+C:\dev\LivestreamBuddy\LivestreamBuddyNew\bin\Release\LobsterKnifeFight.pdb
+C:\dev\LivestreamBuddy\LivestreamBuddyNew\bin\Release\system.windows.controls.input.toolkit.pdb
+C:\dev\LivestreamBuddy\LivestreamBuddyNew\bin\Release\WPFToolkit.pdb
+C:\dev\LivestreamBuddy\LivestreamBuddyNew\bin\Release\Newtonsoft.Json.pdb
+C:\dev\LivestreamBuddy\LivestreamBuddyNew\bin\Release\Newtonsoft.Json.xml
+C:\dev\LivestreamBuddy\LivestreamBuddyNew\obj\Release\LivestreamBuddyNew.csprojResolveAssemblyReference.cache
+C:\dev\LivestreamBuddy\LivestreamBuddyNew\obj\Release\AuthWindow.baml
+C:\dev\LivestreamBuddy\LivestreamBuddyNew\obj\Release\Controls\Channels.baml
+C:\dev\LivestreamBuddy\LivestreamBuddyNew\obj\Release\Controls\CloseableHeader.baml
+C:\dev\LivestreamBuddy\LivestreamBuddyNew\obj\Release\Controls\Giveaway.baml
+C:\dev\LivestreamBuddy\LivestreamBuddyNew\obj\Release\Controls\Stream.baml
+C:\dev\LivestreamBuddy\LivestreamBuddyNew\obj\Release\SingleTextBoxWindow.baml
+C:\dev\LivestreamBuddy\LivestreamBuddyNew\obj\Release\AuthWindow.g.cs
+C:\dev\LivestreamBuddy\LivestreamBuddyNew\obj\Release\Controls\Channels.g.cs
+C:\dev\LivestreamBuddy\LivestreamBuddyNew\obj\Release\Controls\CloseableHeader.g.cs
+C:\dev\LivestreamBuddy\LivestreamBuddyNew\obj\Release\Controls\Giveaway.g.cs
+C:\dev\LivestreamBuddy\LivestreamBuddyNew\obj\Release\Controls\Stream.g.cs
+C:\dev\LivestreamBuddy\LivestreamBuddyNew\obj\Release\MainWindow.g.cs
+C:\dev\LivestreamBuddy\LivestreamBuddyNew\obj\Release\SingleTextBoxWindow.g.cs
+C:\dev\LivestreamBuddy\LivestreamBuddyNew\obj\Release\App.g.cs
+C:\dev\LivestreamBuddy\LivestreamBuddyNew\obj\Release\LivestreamBuddyNew_Content.g.cs
+C:\dev\LivestreamBuddy\LivestreamBuddyNew\obj\Release\GeneratedInternalTypeHelper.g.cs
+C:\dev\LivestreamBuddy\LivestreamBuddyNew\obj\Release\LivestreamBuddyNew_MarkupCompile.cache
+C:\dev\LivestreamBuddy\LivestreamBuddyNew\obj\Release\LivestreamBuddyNew_MarkupCompile.lref
+C:\dev\LivestreamBuddy\LivestreamBuddyNew\obj\Release\MainWindow.baml
+C:\dev\LivestreamBuddy\LivestreamBuddyNew\obj\Release\LivestreamBuddyNew.g.resources
+C:\dev\LivestreamBuddy\LivestreamBuddyNew\obj\Release\LivestreamBuddyNew.Properties.Resources.resources
+C:\dev\LivestreamBuddy\LivestreamBuddyNew\obj\Release\LivestreamBuddyNew.csproj.GenerateResource.Cache

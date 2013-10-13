@@ -38,18 +38,16 @@ namespace LivestreamBuddyNew.Controls
             urlRegex = new Regex(@"(?i)\b((?:[a-z][\w-]+:(?:/{1,3}|[a-z0-9%])|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'.,<>?«»“”‘’]))", RegexOptions.Compiled);
             excludeList = new List<string>();
 
-            webViewStream.NativeViewInitialized += webViewStream_NativeViewInitialized;
-            webViewStream.DocumentReady += webViewStream_DocumentReady;
             webViewStream.SizeChanged += webViewStream_SizeChanged;
 
             webChat.NativeViewInitialized += webChat_NativeViewInitialized;
-            webChat.DocumentReady += webChat_DocumentReady;
             webChat.SizeChanged += webChat_SizeChanged;
         }
 
         public Stream(User user,
             string channelName,
             string accessToken,
+            bool showStreamFeed,
             string[] potentialNicknameColors,
             List<string> streamTitleAutoCompleteOptions,
             List<string> streamGameAutoCompleteOptions,
@@ -66,6 +64,18 @@ namespace LivestreamBuddyNew.Controls
 
             viewModel.TitleAutoCompleteOptions = streamTitleAutoCompleteOptions;
             viewModel.GameAutoCompleteOptions = streamGameAutoCompleteOptions;
+
+            if (showStreamFeed)
+            {
+                webViewStream.NativeViewInitialized += webViewStream_NativeViewInitialized;
+                pnlWebViewStream.Visibility = System.Windows.Visibility.Visible;
+                btnShowHideViewStream.Content = "Hide";
+            }
+            else
+            {
+                pnlWebViewStream.Visibility = System.Windows.Visibility.Collapsed;
+                btnShowHideViewStream.Content = "Show";
+            }
         }
 
         # region Public Methods
@@ -188,6 +198,28 @@ namespace LivestreamBuddyNew.Controls
             webChat.ExecuteJavascript("chatMessage(\"" + nickname + "\", \"" + message + "\", \"" + nickColor + "\");");
         }
 
+        private void webViewStreamLoadHTML()
+        {
+            webChat.DocumentReady += webChat_DocumentReady;
+            webViewStream.LoadHTML("<html><head><script>function resizePlayer(width, height){var player=document.getElementById('live_embed_player_flash');if (width==-1){width=window.innerWidth - 16;}if (height==-1){height=window.innerHeight - 16;}player.style.width=width + 'px';player.style.maxWidth=width + 'px';player.style.height=height + 'px';player.style.maxHeight=height + 'px';}</script></head><body><object type='application/x-shockwave-flash' height='271' width='456' id='live_embed_player_flash' data='http://www.twitch.tv/widgets/live_embed_player.swf?channel=" + this.channelName + "' bgcolor='#000000'><param name='allowFullScreen' value='true'/><param name='allowScriptAccess' value='always'/><param name='allowNetworking' value='all'/><param name='movie' value='http://www.twitch.tv/widgets/live_embed_player.swf'/><param name='flashvars' value='hostname=www.twitch.tv&channel=" + this.channelName + "&auto_play=true&start_volume=25'/></object></body></html>");
+        }
+
+        private void showHideStreamFeed(bool show)
+        {
+            if (!show)
+            {
+                pnlWebViewStream.Visibility = System.Windows.Visibility.Collapsed;
+                webViewStream.LoadHTML("<html><head></head><body></body></html>");
+                btnShowHideViewStream.Content = "Show";
+            }
+            else
+            {
+                pnlWebViewStream.Visibility = System.Windows.Visibility.Visible;
+                webViewStreamLoadHTML();
+                btnShowHideViewStream.Content = "Hide";
+            }
+        }
+
         # endregion
 
         # region Private Members
@@ -212,7 +244,7 @@ namespace LivestreamBuddyNew.Controls
 
         void webViewStream_NativeViewInitialized(object sender, WebViewEventArgs e)
         {
-            webViewStream.LoadHTML("<html><head><script>function resizePlayer(width, height){var player=document.getElementById('live_embed_player_flash');if (width==-1){width=window.innerWidth - 16;}if (height==-1){height=window.innerHeight - 16;}player.style.width=width + 'px';player.style.maxWidth=width + 'px';player.style.height=height + 'px';player.style.maxHeight=height + 'px';}</script></head><body><object type='application/x-shockwave-flash' height='271' width='456' id='live_embed_player_flash' data='http://www.twitch.tv/widgets/live_embed_player.swf?channel=" + this.channelName + "' bgcolor='#000000'><param name='allowFullScreen' value='true'/><param name='allowScriptAccess' value='always'/><param name='allowNetworking' value='all'/><param name='movie' value='http://www.twitch.tv/widgets/live_embed_player.swf'/><param name='flashvars' value='hostname=www.twitch.tv&channel=" + this.channelName + "&auto_play=true&start_volume=25'/></object></body></html>");
+            webViewStreamLoadHTML();
         }
 
         void webViewStream_SizeChanged(object sender, SizeChangedEventArgs e)
@@ -454,6 +486,24 @@ namespace LivestreamBuddyNew.Controls
             };
 
             newWindow.Show();
+        }
+
+        private void DockPanel_SizeChanged_1(object sender, SizeChangedEventArgs e)
+        {
+            if (e.PreviousSize.Height > 0)
+            {
+                double newHeight = pnlWebViewStream.ActualHeight + (e.NewSize.Height - e.PreviousSize.Height);
+
+                if (newHeight > 245)
+                {
+                    pnlWebViewStream.Height = newHeight;
+                }
+            }
+        }
+
+        private void btnShowHideViewStream_Click(object sender, RoutedEventArgs e)
+        {
+            showHideStreamFeed(!pnlWebViewStream.IsVisible);
         }
 
         # endregion

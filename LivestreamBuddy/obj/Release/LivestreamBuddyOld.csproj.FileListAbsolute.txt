@@ -6,3 +6,4 @@ C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\Livestre
 C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\LivestreamBuddy\obj\Release\LivestreamBuddy.frmStreamPreview.resources
 C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\LivestreamBuddy\obj\Release\LivestreamBuddy.Properties.Resources.resources
 C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\LivestreamBuddy\obj\Release\LivestreamBuddyOld.csproj.GenerateResource.Cache
+C:\dev\LivestreamBuddy\LivestreamBuddy\bin\Release\LivestreamBuddy.exe.config

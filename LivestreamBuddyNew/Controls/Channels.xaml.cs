@@ -32,6 +32,7 @@ namespace LivestreamBuddyNew.Controls
 
             channels = new ObservableCollection<ChannelInfo>();
             onlineImage = new BitmapImage(new Uri("pack://application:,,,/LivestreamBuddyNew;component/Resources/check.png"));
+            offlineImage = new BitmapImage(new Uri("pack://application:,,,/LivestreamBuddyNew;component/Resources/grayX.png"));
 
             addStreamToFavoritesList("teamxim");
 
@@ -73,6 +74,7 @@ namespace LivestreamBuddyNew.Controls
         private StreamManager streamManager;
         private BackgroundWorker worker;
         private BitmapImage onlineImage;
+        private BitmapImage offlineImage;
         private bool firstReportDone;
 
         # endregion
@@ -83,7 +85,7 @@ namespace LivestreamBuddyNew.Controls
         {
             if (OnStreamOpen != null)
             {
-                StreamOpenEventArgs args = new StreamOpenEventArgs { ChannelName = channelName.Trim(), OpenInNewTab = (bool)chkStreamOpenStyle.IsChecked };
+                StreamOpenEventArgs args = new StreamOpenEventArgs { ChannelName = channelName.Trim(), OpenInNewTab = (bool)chkStreamOpenStyle.IsChecked, ShowStreamFeed = (bool)chkStreamViewShow.IsChecked };
                 OnStreamOpen(this, args);
             }
         }
@@ -116,7 +118,7 @@ namespace LivestreamBuddyNew.Controls
         {
             if (!streamExists(stream.Channel.Name))
             {
-                BitmapImage indicator = null;
+                BitmapImage indicator = offlineImage;
 
                 if (stream.IsOnline)
                 {
@@ -220,7 +222,7 @@ namespace LivestreamBuddyNew.Controls
                     channel.StreamTitle = string.Empty;
                     channel.Game = string.Empty;
                     channel.Viewers = string.Empty;
-                    channel.OnlineIndicator = null;
+                    channel.OnlineIndicator = offlineImage;
                 }
             }
 
@@ -344,6 +346,8 @@ namespace LivestreamBuddyNew.Controls
         public string ChannelName { get; set; }
 
         public bool OpenInNewTab { get; set; }
+
+        public bool ShowStreamFeed { get; set; }
     }
 
     public class ChannelInfo : INotifyPropertyChanged

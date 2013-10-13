@@ -7,9 +7,13 @@
              d:DesignHeight="300" d:DesignWidth="300">
     <Border Padding="3 3 3 3">
             <TabControl>
-                <TabItem Header="Chat">
-                <DockPanel LastChildFill="True">
+                <TabItem Header="Chat / View">
+                <DockPanel LastChildFill="True" SizeChanged="DockPanel_SizeChanged_1">
                     <TextBox Name="txtMessage" DockPanel.Dock="Bottom" Margin="0 7 0 0" KeyDown="txtMessage_KeyDown" />
+                    <DockPanel Name="pnlWebViewStream" DockPanel.Dock="Top" MinHeight="245">
+                        <my:WebControl Name="webViewStream" Margin="0 0 0 7" />
+                    </DockPanel>
+                    <Button Name="btnShowHideViewStream" Margin="0 0 0 7" DockPanel.Dock="Top" Width="150" Click="btnShowHideViewStream_Click" />
                     <DockPanel DockPanel.Dock="Right" Margin="7 0 0 0" LastChildFill="True">
                         <StackPanel Orientation="Horizontal" DockPanel.Dock="Top" Margin="0 0 0 7">
                             <TextBlock Margin="0 0 7 0">Viewers:</TextBlock>
@@ -18,11 +22,6 @@
                         <ListBox Name="lstViewers" Width="115" ItemsSource="{Binding Viewers}"></ListBox>
                     </DockPanel>
                     <my:WebControl Name="webChat" />
-                </DockPanel>
-            </TabItem>
-            <TabItem Header="View">
-                <DockPanel>
-                    <my:WebControl Name="webViewStream" />
                 </DockPanel>
             </TabItem>
                 <TabItem Header="Manage">

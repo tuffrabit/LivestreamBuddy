@@ -128,7 +128,8 @@ namespace LivestreamBuddyNew
                         {
                             Controls.Stream stream = new Controls.Stream(this.user, 
                                 e.ChannelName, 
-                                this.user.AccessToken, 
+                                this.user.AccessToken,
+                                e.ShowStreamFeed, 
                                 this.potentialNicknameColors, 
                                 this.streamTitleAutoCompleteOptions, 
                                 this.streamGameAutoCompleteOptions, 
@@ -154,6 +155,7 @@ namespace LivestreamBuddyNew
                             Controls.Stream stream = new Controls.Stream(this.user, 
                                 e.ChannelName, 
                                 this.user.AccessToken, 
+                                e.ShowStreamFeed, 
                                 this.potentialNicknameColors, 
                                 this.streamTitleAutoCompleteOptions,
                                 this.streamGameAutoCompleteOptions,
@@ -165,7 +167,9 @@ namespace LivestreamBuddyNew
                             Window newWindow = new Window
                             {
                                 Width = 525,
-                                Height = 425,
+                                MinWidth = 525,
+                                Height = 675,
+                                MinHeight = 675,
                                 Title = e.ChannelName,
                                 Icon = ibd.Frames[0],
                                 Background = brush,

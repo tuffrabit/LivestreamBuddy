@@ -188,19 +188,18 @@ namespace LivestreamBuddyNew
         {
             List<string> strings = new List<string>();
 
-            if (!File.Exists(fileName))
+            try
             {
-                File.Create(fileName);
-            }
-
-            using (StreamReader reader = File.OpenText(fileName))
-            {
-                string line;
-                while ((line = reader.ReadLine()) != null)
+                using (StreamReader reader = File.OpenText(fileName))
                 {
-                    strings.Add(line);
+                    string line;
+                    while ((line = reader.ReadLine()) != null)
+                    {
+                        strings.Add(line);
+                    }
                 }
             }
+            catch { }
 
             return strings.ToArray();
         }
