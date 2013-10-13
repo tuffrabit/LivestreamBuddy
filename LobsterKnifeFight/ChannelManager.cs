@@ -21,7 +21,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 
-namespace LivestreamBuddy
+namespace LobsterKnifeFight
 {
     public class ChannelManager : TwitchManager<Channel>
     {
@@ -32,7 +32,7 @@ namespace LivestreamBuddy
 
         public void UpdateChannel(User user, string channelName, string title, string game)
         {
-            if (string.IsNullOrEmpty(user.GetAccessToken(UserScope.ChannelEditor)))
+            if (string.IsNullOrEmpty(user.AccessToken))
             {
                 throw new ArgumentNullException("AccessToken must be present for PUT requests.");
             }
@@ -51,18 +51,28 @@ namespace LivestreamBuddy
                 }
             };
 
-            twitchRequest.AccessToken = user.GetAccessToken(UserScope.ChannelEditor);
-            JObject response = JObject.Parse(twitchRequest.MakeRequest(RequestType.Put, "/" + channelName, ToJson(channel)));
+            TwitchRequestResult result = twitchRequest.MakeRequest(RequestType.Put, "/" + channelName, ToJson(channel), user.AccessToken);
 
-            if (response["error"] != null)
+            switch (result.Result)
             {
-                throw new Exception(string.Format("UpdateChannel failed.  Error {0} {1}: {2}", response["status"], response["error"], response["message"]));
+                case TwitchRequestResults.Success:
+                    JObject response = JObject.Parse(result.Data);
+
+                    if (response["error"] != null)
+                    {
+                        throw new Exception(string.Format("UpdateChannel failed.  Error {0} {1}: {2}", response["status"], response["error"], response["message"]));
+                    }
+
+                    break;
+                case TwitchRequestResults.Unauthorized:
+                    throw new TwitchRequestUnauthorizedException();
+                    break;
             }
         }
 
         public void RunCommercial(User user, string channelName, CommercialLength commerciallength)
         {
-            if (string.IsNullOrEmpty(user.GetAccessToken(UserScope.ChannelEditor)))
+            if (string.IsNullOrEmpty(user.AccessToken))
             {
                 throw new ArgumentNullException("AccessToken must be present for POST requests.");
             }
@@ -87,12 +97,22 @@ namespace LivestreamBuddy
                     break;
             }
 
-            twitchRequest.AccessToken = user.GetAccessToken(UserScope.ChannelEditor);
-            JObject response = JObject.Parse(twitchRequest.MakeRequest(RequestType.Post, "/" + channelName + "/commercial", "length=" + length.ToString()));
+            TwitchRequestResult result = twitchRequest.MakeRequest(RequestType.Post, "/" + channelName + "/commercial", "length=" + length.ToString(), user.AccessToken);
 
-            if (response["error"] != null)
+            switch (result.Result)
             {
-                throw new Exception(string.Format("RunCommercial failed.  Error {0} {1}: {2}", response["status"], response["error"], response["message"]));
+                case TwitchRequestResults.Success:
+                    JObject response = JObject.Parse(result.Data);
+
+                    if (response["error"] != null)
+                    {
+                        throw new Exception(string.Format("RunCommercial failed.  Error {0} {1}: {2}", response["status"], response["error"], response["message"]));
+                    }
+
+                    break;
+                case TwitchRequestResults.Unauthorized:
+                    throw new TwitchRequestUnauthorizedException();
+                    break;
             }
         }
 

@@ -20,7 +20,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace LivestreamBuddy
+namespace LobsterKnifeFight
 {
     public class User
     {
@@ -30,11 +30,11 @@ namespace LivestreamBuddy
 
         public string Password { get; set; }
 
-        public Dictionary<UserScope, string> AccessTokens { get; set; }
+        public Dictionary<UserScope, AccessToken> AccessTokens { get; set; }
 
-        public string GetAccessToken(UserScope scope)
+        public AccessToken GetAccessToken(UserScope scope)
         {
-            string accessToken = null;
+            AccessToken accessToken = null;
 
             if (this.AccessTokens != null)
             {
@@ -47,9 +47,11 @@ namespace LivestreamBuddy
             return accessToken;
         }
 
+        public string AccessToken { get; set; }
+
         public User()
         {
-            this.AccessTokens = new Dictionary<UserScope, string>();
+            this.AccessTokens = new Dictionary<UserScope, AccessToken>();
         }
     }
 }

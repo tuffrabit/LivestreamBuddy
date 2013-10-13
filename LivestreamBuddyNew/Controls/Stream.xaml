@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="LivestreamBuddyNew.Controls.Stream"
+﻿<UserControl xmlns:Controls="clr-namespace:System.Windows.Controls;assembly=System.Windows.Controls.Input.Toolkit"  xmlns:my="http://schemas.awesomium.com/winfx"  x:Class="LivestreamBuddyNew.Controls.Stream"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -6,6 +6,45 @@
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
     <Border Padding="3 3 3 3">
-        <TextBlock>bob</TextBlock>
+            <TabControl>
+                <TabItem Header="Chat">
+                <DockPanel LastChildFill="True">
+                    <TextBox Name="txtMessage" DockPanel.Dock="Bottom" Margin="0 7 0 0" KeyDown="txtMessage_KeyDown" />
+                    <DockPanel DockPanel.Dock="Right" Margin="7 0 0 0" LastChildFill="True">
+                        <StackPanel Orientation="Horizontal" DockPanel.Dock="Top" Margin="0 0 0 7">
+                            <TextBlock Margin="0 0 7 0">Viewers:</TextBlock>
+                            <TextBlock Name="lblViewerCount"></TextBlock>
+                        </StackPanel>
+                        <ListBox Name="lstViewers" Width="115" ItemsSource="{Binding Viewers}"></ListBox>
+                    </DockPanel>
+                    <my:WebControl Name="webChat" />
+                </DockPanel>
+            </TabItem>
+            <TabItem Header="View">
+                <DockPanel>
+                    <my:WebControl Name="webViewStream" />
+                </DockPanel>
+            </TabItem>
+                <TabItem Header="Manage">
+                <StackPanel Orientation="Vertical">
+                    <Grid DockPanel.Dock="Top" Margin="0 0 0 7">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <Label Grid.Row="0" Grid.Column="0">Title:</Label>
+                        <Controls:AutoCompleteBox Grid.Row="0" Grid.Column="1" Name="txtStreamTitle" Height="22" Width="200" ItemsSource="{Binding TitleAutoCompleteOptions}" />
+                        <Label Grid.Row="1" Grid.Column="0">Game:</Label>
+                        <Controls:AutoCompleteBox Grid.Row="1" Grid.Column="1" Name="txtStreamGame" Height="22" Width="200" ItemsSource="{Binding GameAutoCompleteOptions}" />
+                    </Grid>
+                    <Button DockPanel.Dock="Top" Height="22" Click="UpdateStreamClick" Margin="0 0 0 7">Update</Button>
+                    <Button DockPanel.Dock="Top" Height="22" Click="GiveawayClick">Giveaway</Button>
+                </StackPanel>
+            </TabItem>
+            </TabControl>
     </Border>
 </UserControl>

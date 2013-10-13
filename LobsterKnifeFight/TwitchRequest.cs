@@ -22,13 +22,11 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace LivestreamBuddy
+namespace LobsterKnifeFight
 {
     public class TwitchRequest
     {
         public string RequestDomain { get; set; }
-
-        public string AccessToken { get; set; }
 
         public TwitchRequest()
         {
@@ -51,9 +49,9 @@ namespace LivestreamBuddy
             }
         }
 
-        public string MakeRequest(RequestType requestType, string data, string body)
+        public TwitchRequestResult MakeRequest(RequestType requestType, string data, string body, string accessToken = null)
         {
-            string returnValue = null;
+            TwitchRequestResult returnValue = new TwitchRequestResult();
 
             if (!string.IsNullOrEmpty(RequestDomain))
             {
@@ -64,6 +62,11 @@ namespace LivestreamBuddy
                 request.ContentType = "application/json";
                 request.Headers.Add("Client-ID: a13o59im5mfpi5y8afoc3jer8vidva0");
 
+                if (!string.IsNullOrEmpty(accessToken))
+                {
+                    request.Headers.Add("Authorization: OAuth " + accessToken);
+                }
+
                 switch (requestType)
                 {
                     case RequestType.Get:
@@ -71,7 +74,6 @@ namespace LivestreamBuddy
 
                         break;
                     case RequestType.Put:
-                        request.Headers.Add("Authorization: OAuth " + AccessToken);
                         request.Method = "PUT";
 
                         byte[] dataBuffer = System.Text.Encoding.UTF8.GetBytes(body);
@@ -84,7 +86,6 @@ namespace LivestreamBuddy
 
                         break;
                     case RequestType.Post:
-                        request.Headers.Add("Authorization: OAuth " + AccessToken);
                         request.Method = "POST";
 
                         writeDataToRequest(ref request, body);
@@ -96,11 +97,25 @@ namespace LivestreamBuddy
                         break;
                 }
 
-                using (HttpWebResponse response = request.GetResponse() as HttpWebResponse)
+                try
                 {
-                    StreamReader responseReader = new StreamReader(response.GetResponseStream());
+                    using (HttpWebResponse response = request.GetResponse() as HttpWebResponse)
+                    {
+                        StreamReader responseReader = new StreamReader(response.GetResponseStream());
 
-                    returnValue = responseReader.ReadToEnd();
+                        returnValue.Data = responseReader.ReadToEnd();
+                        returnValue.Result = TwitchRequestResults.Success;
+                    }
+                }
+                catch (WebException ex)
+                {
+                    string message = ex.Message.ToLower();
+
+                    if (message.Contains("401") && message.Contains("unauthorized"))
+                    {
+                        returnValue.Data = string.Empty;
+                        returnValue.Result = TwitchRequestResults.Unauthorized;
+                    }
                 }
             }
             else
@@ -110,5 +125,18 @@ namespace LivestreamBuddy
 
             return returnValue;
         }
+    }
+
+    public class TwitchRequestResult
+    {
+        public string Data { get; set; }
+
+        public TwitchRequestResults Result { get; set; }
+    }
+
+    public enum TwitchRequestResults
+    {
+        Success, 
+        Unauthorized
     }
 }

@@ -20,7 +20,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace LivestreamBuddy
+namespace LobsterKnifeFight
 {
     public class Channel
     {
@@ -30,6 +30,6 @@ namespace LivestreamBuddy
 
         public string Title { get; set; }
 
-        public LivestreamBuddy.Stream CurrentStream { get; set; }
+        public LobsterKnifeFight.Stream CurrentStream { get; set; }
     }
 }

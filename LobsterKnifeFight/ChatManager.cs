@@ -21,7 +21,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 
-namespace LivestreamBuddy
+namespace LobsterKnifeFight
 {
     public class ChatManager : TwitchManager<Chat>
     {
@@ -33,37 +33,44 @@ namespace LivestreamBuddy
         public Emoticon[] GetEmoticons()
         {
             List<Emoticon> emoticons = null;
-            JObject rawChat = JObject.Parse(twitchRequest.MakeRequest(RequestType.Get, "/emoticons", null));
+            TwitchRequestResult result = twitchRequest.MakeRequest(RequestType.Get, "/emoticons", null);
 
-            if (rawChat["error"] != null)
+            if (result.Result == TwitchRequestResults.Success)
             {
-                throw new Exception(string.Format("GetEmoticons failed.  Error {0} {1}: {2}", rawChat["status"], rawChat["error"], rawChat["message"]));
-            }
-            else if (rawChat["emoticons"] != null && rawChat["emoticons"].HasValues)
-            {
-                emoticons = new List<Emoticon>();
+                JObject rawChat = JObject.Parse(result.Data);
 
-                foreach (JToken child in rawChat["emoticons"].ToArray())
+                if (rawChat["error"] != null)
                 {
-                    emoticons.Add(new Emoticon
+                    throw new Exception(string.Format("GetEmoticons failed.  Error {0} {1}: {2}", rawChat["status"], rawChat["error"], rawChat["message"]));
+                }
+                else if (rawChat["emoticons"] != null && rawChat["emoticons"].HasValues)
+                {
+                    emoticons = new List<Emoticon>();
+
+                    foreach (JToken child in rawChat["emoticons"].ToArray())
                     {
-                        Regex = new System.Text.RegularExpressions.Regex((string)child["regex"], System.Text.RegularExpressions.RegexOptions.Compiled), 
-                        //Height = (Int32)child["images"][0]["height"],
-                        //Width = (Int32)child["images"][0]["width"],
-                        Url = (string)child["images"][0]["url"]
-                        //Set = (Int32)child["images"][0]["emoticon_set"]
-                    });
+                        emoticons.Add(new Emoticon
+                        {
+                            Regex = new System.Text.RegularExpressions.Regex((string)child["regex"], System.Text.RegularExpressions.RegexOptions.Compiled),
+                            //Height = (Int32)child["images"][0]["height"],
+                            //Width = (Int32)child["images"][0]["width"],
+                            Url = (string)child["images"][0]["url"]
+                            //Set = (Int32)child["images"][0]["emoticon_set"]
+                        });
+                    }
+                }
+
+                if (emoticons == null)
+                {
+                    return null;
+                }
+                else
+                {
+                    return emoticons.ToArray();
                 }
             }
 
-            if (emoticons == null)
-            {
-                return null;
-            }
-            else
-            {
-                return emoticons.ToArray();
-            }
+            return null;
         }
 
         public override string ToJson(Chat twitchObject)

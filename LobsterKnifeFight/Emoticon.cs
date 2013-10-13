@@ -21,7 +21,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace LivestreamBuddy
+namespace LobsterKnifeFight
 {
     public class Emoticon
     {

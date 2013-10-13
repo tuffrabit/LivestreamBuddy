@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -12,7 +13,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using LivestreamBuddy;
+using Awesomium.Core;
+using LobsterKnifeFight;
 
 namespace LivestreamBuddyNew
 {
@@ -24,18 +26,67 @@ namespace LivestreamBuddyNew
         public MainWindow()
         {
             InitializeComponent();
-            Awesomium.Core.WebCore.Initialize(new Awesomium.Core.WebConfig());
+            WebCore.Initialize(
+                new Awesomium.Core.WebConfig()
+                    {
+                        PluginsPath = System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)
+                    }, 
+                true);
 
             visibleStreams = new List<string>();
-            user = new User();
+            user = DataFileManager.GetUser();
 
+            channelsControl.User = this.user;
             channelsControl.OnStreamOpen += channelsControl_OnStreamOpen;
+
+            potentialNicknameColors = new string[] { "#0000FF", "#FF0000", "#00FF00", "#9900CC", "#FF99CC", 
+                                                        "#990000", "#3399FF", "#99CCFF", "#FF0033", "#33FF00", 
+                                                        "#9933FF", "#FF3399", "#663300", "#669999", "#00FFFF", 
+                                                        "#CC0000", "#FF9933", "#33F33", "#9999FF", "#CC0066", 
+                                                        "#CC9966", "#FF6666", "#99FFCC", "#0033CC", "#666633"};
+
+            streamTitleAutoCompleteOptions = new List<string>();
+            streamTitleAutoCompleteOptions.AddRange(DataFileManager.GetStreamTitleAutoCompleteStrings());
+
+            streamGameAutoCompleteOptions = new List<string>();
+            streamGameAutoCompleteOptions.AddRange(DataFileManager.GetStreamGameAutoCompleteStrings());
+
+            emoticons = null;
+
+            bool allowEmoticons = true;
+            bool refreshEmoticons = false;
+            string[] commandLineArgs = Environment.GetCommandLineArgs();
+
+            foreach (string arg in commandLineArgs)
+            {
+                if (string.Compare(arg, "-noemote", StringComparison.OrdinalIgnoreCase) == 0)
+                {
+                    allowEmoticons = false;
+                }
+                else if (string.Compare(arg, "-refreshemoticons", StringComparison.OrdinalIgnoreCase) == 0)
+                {
+                    refreshEmoticons = true;
+                }
+            }
+
+            if (allowEmoticons)
+            {
+                try
+                {
+                    emoticons = DataFileManager.GetEmoticons(refreshEmoticons);
+                }
+                catch { }
+            }
         }
 
         # region Private Properties
 
         private List<string> visibleStreams;
         private User user;
+        private string[] potentialNicknameColors;
+        private List<string> streamTitleAutoCompleteOptions;
+        private List<string> streamGameAutoCompleteOptions;
+        private List<Emoticon> emoticons;
 
         # endregion
 
@@ -65,37 +116,81 @@ namespace LivestreamBuddyNew
         {
             if (e != null && !string.IsNullOrEmpty(e.ChannelName) && !isStreamVisible(e.ChannelName))
             {
-                if (user.GetAccessToken(UserScope.ChatLogin) == null)
-                {
-                    AuthWindow authWindow = new AuthWindow(user, UserScope.ChatLogin);
-                    authWindow.ShowDialog();
+                Utility.GetAccessToken(this.user);
 
-                    user.AccessTokens.Add(UserScope.ChatLogin, authWindow.AccessToken);
-                }
-
-                if (user.GetAccessToken(UserScope.ChatLogin) != null && !string.IsNullOrEmpty(user.Name))
+                try
                 {
-                    if (e.OpenInNewTab)
+                    if (!string.IsNullOrEmpty(user.AccessToken) && !string.IsNullOrEmpty(user.Name))
                     {
-                        mainTabs.Items.Add(new TabItem { Header = e.ChannelName, Content = new Controls.Stream() });
+                        visibleStreams.Add(e.ChannelName);
+
+                        if (e.OpenInNewTab)
+                        {
+                            Controls.Stream stream = new Controls.Stream(this.user, 
+                                e.ChannelName, 
+                                this.user.AccessToken, 
+                                this.potentialNicknameColors, 
+                                this.streamTitleAutoCompleteOptions, 
+                                this.streamGameAutoCompleteOptions, 
+                                this.emoticons);
+
+                            ClosableTab tab = new ClosableTab
+                            {
+                                Title = e.ChannelName,
+                                VerticalContentAlignment = System.Windows.VerticalAlignment.Stretch,
+                                Content = stream
+                            };
+
+                            tab.Closing += delegate(object tabClosingSender, EventArgs tabClosingArgs)
+                            {
+                                visibleStreams.Remove(e.ChannelName);
+                                stream.Disconnect();
+                            };
+
+                            mainTabs.Items.Add(tab);
+                        }
+                        else
+                        {
+                            Controls.Stream stream = new Controls.Stream(this.user, 
+                                e.ChannelName, 
+                                this.user.AccessToken, 
+                                this.potentialNicknameColors, 
+                                this.streamTitleAutoCompleteOptions,
+                                this.streamGameAutoCompleteOptions,
+                                this.emoticons);
+
+                            IconBitmapDecoder ibd = new IconBitmapDecoder(new Uri("pack://application:,,,/LivestreamBuddyNew;component/livestream-ICON.ico"), BitmapCreateOptions.None, BitmapCacheOption.Default);
+                            LinearGradientBrush brush = new LinearGradientBrush((Color)ColorConverter.ConvertFromString("#FF515151"), Colors.LightGray, new Point(.5, 0), new Point(.5, 1));
+
+                            Window newWindow = new Window
+                            {
+                                Width = 525,
+                                Height = 425,
+                                Title = e.ChannelName,
+                                Icon = ibd.Frames[0],
+                                Background = brush,
+                                Content = new Border { Padding = new Thickness(13, 13, 13, 13), Child = stream }
+                            };
+
+                            newWindow.Closing += delegate(object windowClosingSender, System.ComponentModel.CancelEventArgs windowClosingArgs)
+                            {
+                                visibleStreams.Remove(e.ChannelName);
+                                stream.Disconnect();
+                            };
+
+                            newWindow.Show();
+                        }
                     }
                     else
                     {
-                        IconBitmapDecoder ibd = new IconBitmapDecoder(new Uri("pack://application:,,,/LivestreamBuddy;component/livestream-ICON.ico"), BitmapCreateOptions.None, BitmapCacheOption.Default);
-
-                        Window newWindow = new Window
-                        {
-                            Width = 525,
-                            Height = 425,
-                            Title = e.ChannelName,
-                            Icon = ibd.Frames[0],
-                            Content = new Border { Padding = new Thickness(13, 13, 13, 13), Child = new Controls.Stream() }
-                        };
-
-                        newWindow.ShowDialog();
+                        throw new Exception();
                     }
+                }
+                catch
+                {
+                    Utility.ClearUserData(this.user);
 
-                    visibleStreams.Add(e.ChannelName);
+                    MessageBox.Show("Something went wrong. Try again.");
                 }
             }
         }

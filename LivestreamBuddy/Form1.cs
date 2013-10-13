@@ -32,6 +32,7 @@ using System.IO;
 using Gecko;
 using Gecko.DOM;
 using System.Text.RegularExpressions;
+using LobsterKnifeFight;
 
 namespace LivestreamBuddy
 {

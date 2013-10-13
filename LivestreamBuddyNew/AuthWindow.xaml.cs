@@ -12,7 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using Awesomium.Core;
-using LivestreamBuddy;
+using LobsterKnifeFight;
 
 namespace LivestreamBuddyNew
 {
@@ -25,29 +25,32 @@ namespace LivestreamBuddyNew
         {
             InitializeComponent();
 
+            this.saveAccessToken = true;
+
             webBrowser.NativeViewInitialized += webBrowser_NativeViewInitialized;
             webBrowser.DocumentReady += webBrowser_DocumentReady;
             webBrowser.LoadingFrame += webBrowser_LoadingFrame;
         }
 
-        public AuthWindow(User user, UserScope scope)
+        public AuthWindow(User user, UserScope[] scopes)
             : this()
         {
             this.user = user;
-            this.Scope = scope;
+            this.Scopes = scopes;
         }
 
         # region Public Properties
 
         public string AccessToken { get; private set; }
 
-        public UserScope Scope { get; private set; }
+        public UserScope[] Scopes { get; private set; }
 
         # endregion
 
         # region Private Properties
 
         private User user;
+        private bool saveAccessToken;
 
         # endregion
 
@@ -57,9 +60,23 @@ namespace LivestreamBuddyNew
         {
             webBrowser.LoadHTML("<html><body><h3>Loading...</h3></body></html>");
 
-            string userScope = EnumHelper.GetUserScope(this.Scope);
+            string userscopes = string.Empty;
 
-            webBrowser.Source = new Uri("https://api.twitch.tv/kraken/oauth2/authorize?response_type=token&client_id=a13o59im5mfpi5y8afoc3jer8vidva0&redirect_uri=http://www.google.com&scope=" + userScope);
+            for (int i = 0; i < Scopes.Length; i++)
+            {
+                UserScope scope = Scopes[i];
+
+                if (i + 1 < Scopes.Length)
+                {
+                    userscopes += EnumHelper.GetUserScope(scope) + " ";
+                }
+                else
+                {
+                    userscopes += EnumHelper.GetUserScope(scope);
+                }
+            }
+
+            webBrowser.Source = new Uri("https://api.twitch.tv/kraken/oauth2/authorize?response_type=token&client_id=a13o59im5mfpi5y8afoc3jer8vidva0&redirect_uri=http://www.google.com&scope=" + userscopes);
         }
 
         void webBrowser_LoadingFrame(object sender, Awesomium.Core.LoadingFrameEventArgs e)
@@ -74,9 +91,25 @@ namespace LivestreamBuddyNew
                     {
                         dynamic userLoginField = document.getElementById("user_login");
 
-                        if (userLoginField != null && string.IsNullOrEmpty(user.Name))
+                        if (!Object.ReferenceEquals(null, userLoginField))
                         {
-                            user.Name = userLoginField.value;
+                            try
+                            {
+                                string value = (string)userLoginField.value;
+
+                                if (!string.IsNullOrEmpty(value))
+                                {
+                                    if (string.IsNullOrEmpty(user.Name))
+                                    {
+                                        user.Name = value;
+                                    }
+                                    else if (string.Compare(user.Name, value, StringComparison.OrdinalIgnoreCase) != 0)
+                                    {
+                                        this.saveAccessToken = false;
+                                    }
+                                }
+                            }
+                            catch { this.saveAccessToken = true; }
                         }
                     }
                 }
@@ -87,17 +120,26 @@ namespace LivestreamBuddyNew
         {
             if (!string.IsNullOrEmpty(e.Url.Fragment))
             {
-                int keyIndex = e.Url.Fragment.IndexOf("access_token=");
-
-                if (keyIndex > -1)
+                if (this.saveAccessToken)
                 {
-                    int endIndex = e.Url.Fragment.IndexOf('&', keyIndex) - 14;
+                    int keyIndex = e.Url.Fragment.IndexOf("access_token=");
 
-                    keyIndex += 13;
-                    this.AccessToken = e.Url.Fragment.Substring(keyIndex, endIndex);
+                    if (keyIndex > -1)
+                    {
+                        int endIndex = e.Url.Fragment.IndexOf('&', keyIndex) - 14;
 
-                    this.Close();
+                        keyIndex += 13;
+                        this.AccessToken = e.Url.Fragment.Substring(keyIndex, endIndex);
+                    }
+
+                    this.DialogResult = true;
                 }
+                else
+                {
+                    this.DialogResult = false;
+                }
+
+                this.Close();
             }
         }
 

@@ -7,11 +7,44 @@
              d:DesignHeight="310" d:DesignWidth="300">
     <Border Padding="3 3 3 3">
         <StackPanel Orientation="Vertical">
-            <TextBlock FontWeight="Bold">Favorite &amp; Featured Channels</TextBlock>
+            <DockPanel Margin="0 0 0 7">
+                <Button Width="200" Name="btnShowFeaturedStreams" IsEnabled="False" DockPanel.Dock="Left" Click="ShowFeaturedStreamsClick">Show Featured Streams</Button>
+                <Button Width="200" Name="btnShowFollowedStreams" IsEnabled="False" DockPanel.Dock="Right" Click="ShowFollowedStreamsClick">Show Followed Streams</Button>
+            </DockPanel>
             <ContentControl Height="200">
-                <DataGrid Name="grdChannels" ItemsSource="{Binding channels,UpdateSourceTrigger=PropertyChanged}" AutoGenerateColumns="False" Margin="0 0 0 7" MouseDoubleClick="grdChannels_MouseDoubleClick">
+                <DataGrid Name="grdChannels" AlternationCount="2" SelectionMode="Single" SelectionUnit="FullRow" IsReadOnly="True" ItemsSource="{Binding channels,UpdateSourceTrigger=PropertyChanged}" AutoGenerateColumns="False" Margin="0 0 0 7" MouseDoubleClick="grdChannels_MouseDoubleClick" SelectionChanged="grdChannels_SelectionChanged">
+                    <DataGrid.RowStyle>
+                        <Style TargetType="DataGridRow">
+                            <Style.Triggers>
+                                <Trigger Property="ItemsControl.AlternationIndex" Value="0">
+                                    <Setter Property="Background" Value="LightGray" />
+                                </Trigger>
+                                <Trigger Property="IsSelected" Value="True">
+                                    <Setter Property="Foreground" Value="White" />
+                                    <Setter Property="Background" Value="#FF515151" />
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </DataGrid.RowStyle>
+                    <DataGrid.CellStyle>
+                        <Style TargetType="DataGridCell">
+                            <Style.Triggers>
+                                <Trigger Property="IsSelected" Value="True">
+                                    <Setter Property="Foreground" Value="White" />
+                                    <Setter Property="Background" Value="#FF515151" />
+                                </Trigger>
+                            </Style.Triggers>
+                            <Setter Property="BorderThickness" Value="0"/>
+                        </Style>
+                    </DataGrid.CellStyle>
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="Channel Name" Binding="{Binding Name}" IsReadOnly="True"></DataGridTextColumn>
+                        <DataGridTextColumn Header="Channel Name" Binding="{Binding Name}" IsReadOnly="True" Width="110">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="{x:Type TextBlock}">
+                                    <Setter Property="ToolTip" Value="{Binding Name}"></Setter>
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
                         <DataGridTextColumn Header="Stream Title" Binding="{Binding StreamTitle}" IsReadOnly="True" Width="SizeToHeader">
                             <DataGridTextColumn.ElementStyle>
                                 <Style TargetType="{x:Type TextBlock}">
@@ -27,7 +60,7 @@
                             </DataGridTextColumn.ElementStyle>
                         </DataGridTextColumn>
                         <DataGridTextColumn Header="Viewers" Binding="{Binding Viewers}" IsReadOnly="True"></DataGridTextColumn>
-                        <DataGridTemplateColumn Width="*">
+                        <DataGridTemplateColumn Header="Online" Width="*">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <Image Source="{Binding OnlineIndicator}" Width="80" Height="20" />
@@ -37,9 +70,12 @@
                     </DataGrid.Columns>
                 </DataGrid>
             </ContentControl>
-            <Button Name="btnAddToFavoriteChannel" Margin="0 0 0 7" Click="btnAddToFavoriteChannel_Click">Add Favorite Channel</Button>
             <DockPanel Margin="0 0 0 7">
-                <Button Name="btnGoToChannel" Margin="0 0 3 0" Width="125" Click="btnGoToChannel_Click">Go To Channel:</Button>
+                <Button Name="btnAddToFavoriteChannel" IsEnabled="False" Click="btnAddToFavoriteChannel_Click" Width="200" DockPanel.Dock="Left">Add Favorite Channel</Button>
+                <Button Name="btnRemoveChannel" IsEnabled="False" Width="200" DockPanel.Dock="Right" Click="RemoveChannelClick">Remove Channel</Button>
+            </DockPanel>
+            <DockPanel Margin="0 0 0 7">
+                <Button Name="btnGoToChannel" IsEnabled="False" Margin="0 0 3 0" Width="125" Click="btnGoToChannel_Click">Go To Channel:</Button>
                 <TextBox Name="txtGoToChannel" />
             </DockPanel>
             <CheckBox Name="chkStreamOpenStyle" IsChecked="True">Open streams in new tab</CheckBox>

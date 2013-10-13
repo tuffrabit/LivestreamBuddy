@@ -22,7 +22,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace LivestreamBuddy
+namespace LobsterKnifeFight
 {
     public class StreamManager : TwitchManager<Stream>
     {
@@ -31,41 +31,52 @@ namespace LivestreamBuddy
             twitchRequest = new TwitchRequest("streams");
         }
 
-        public LivestreamBuddy.Stream GetStream(string channelName)
+        public LobsterKnifeFight.Stream GetStream(string channelName)
         {
-            LivestreamBuddy.Stream stream = null;
-            JObject rawStream = JObject.Parse(twitchRequest.MakeRequest(RequestType.Get, "/" + channelName, null));
+            LobsterKnifeFight.Stream stream = null;
+            TwitchRequestResult result = twitchRequest.MakeRequest(RequestType.Get, "/" + channelName, null);
 
-            if (rawStream["error"] != null)
+            switch (result.Result)
             {
-                throw new Exception(string.Format("GetStream failed.  Error {0} {1}: {2}", rawStream["status"], rawStream["error"], rawStream["message"]));
-            }
-            else if (rawStream["stream"] != null && rawStream["stream"].HasValues)
-            {
-                stream = new LivestreamBuddy.Stream
-                {
-                    IsOnline = true,
-                    Id = (Int64)rawStream["stream"]["_id"],
-                    Game = (string)rawStream["stream"]["game"],
-                    ViewerCount = (Int64)rawStream["stream"]["viewers"],
-                    Channel = new LivestreamBuddy.Channel
+                case TwitchRequestResults.Success:
+                    JObject rawStream = JObject.Parse(result.Data);
+
+                    if (rawStream["error"] != null)
                     {
-                        Id = (Int64)rawStream["stream"]["channel"]["_id"],
-                        Name = (string)rawStream["stream"]["channel"]["name"],
-                        Title = (string)rawStream["stream"]["channel"]["status"]
+                        throw new Exception(string.Format("GetStream failed.  Error {0} {1}: {2}", rawStream["status"], rawStream["error"], rawStream["message"]));
                     }
-                };
+                    else if (rawStream["stream"] != null && rawStream["stream"].HasValues)
+                    {
+                        stream = new LobsterKnifeFight.Stream
+                        {
+                            IsOnline = true,
+                            Id = (Int64)rawStream["stream"]["_id"],
+                            Game = (string)rawStream["stream"]["game"],
+                            ViewerCount = (Int64)rawStream["stream"]["viewers"],
+                            Channel = new LobsterKnifeFight.Channel
+                            {
+                                Id = (Int64)rawStream["stream"]["channel"]["_id"],
+                                Name = (string)rawStream["stream"]["channel"]["name"],
+                                Title = (string)rawStream["stream"]["channel"]["status"]
+                            }
+                        };
 
-                stream.Channel.CurrentStream = stream;
+                        stream.Channel.CurrentStream = stream;
+                    }
+                    else
+                    {
+                        stream = new LobsterKnifeFight.Stream
+                        {
+                            IsOnline = false
+                        };
+                    }
+
+                    break;
+                case TwitchRequestResults.Unauthorized:
+                    throw new TwitchRequestUnauthorizedException();
+                    break;
             }
-            else
-            {
-                stream = new LivestreamBuddy.Stream
-                {
-                    IsOnline = false
-                };
-            }
-            
+
             return stream;
         }
 
@@ -74,71 +85,143 @@ namespace LivestreamBuddy
         /// </summary>
         /// <param name="channels">Comma separated list of channels to query</param>
         /// <returns>A list of twitch streams</returns>
-        public List<LivestreamBuddy.Stream> GetStreams(string channels)
+        public List<LobsterKnifeFight.Stream> GetStreams(string channels)
         {
-            List<LivestreamBuddy.Stream> streams = new List<Stream>();
-            JObject rawStreams = JObject.Parse(twitchRequest.MakeRequest(RequestType.Get, "?channel=" + channels, null));
+            List<LobsterKnifeFight.Stream> streams = new List<LobsterKnifeFight.Stream>();
+            TwitchRequestResult result = twitchRequest.MakeRequest(RequestType.Get, "?channel=" + channels, null);
 
-            if (rawStreams["error"] != null)
+            switch (result.Result)
             {
-                throw new Exception(string.Format("GetStreams failed.  Error {0} {1}: {2}", rawStreams["status"], rawStreams["error"], rawStreams["message"]));
-            }
-            else if (rawStreams["streams"] != null && rawStreams["streams"].HasValues)
-            {
-                foreach (JToken child in rawStreams["streams"].ToArray())
-                {
-                    LivestreamBuddy.Stream stream = null;
+                case TwitchRequestResults.Success:
+                    JObject rawStreams = JObject.Parse(result.Data);
 
-                    stream = new LivestreamBuddy.Stream
+                    if (rawStreams["error"] != null)
                     {
-                        IsOnline = true,
-                        Id = (Int64)child["_id"],
-                        Game = (string)child["game"],
-                        ViewerCount = (Int64)child["viewers"],
-                        Channel = new LivestreamBuddy.Channel
+                        throw new Exception(string.Format("GetStreams failed.  Error {0} {1}: {2}", rawStreams["status"], rawStreams["error"], rawStreams["message"]));
+                    }
+                    else if (rawStreams["streams"] != null && rawStreams["streams"].HasValues)
+                    {
+                        foreach (JToken child in rawStreams["streams"].ToArray())
                         {
-                            Id = (Int64)child["channel"]["_id"],
-                            Name = (string)child["channel"]["name"],
-                            Title = (string)child["channel"]["status"]
-                        }
-                    };
+                            LobsterKnifeFight.Stream stream = null;
 
-                    streams.Add(stream);
-                }
+                            stream = new LobsterKnifeFight.Stream
+                            {
+                                IsOnline = true,
+                                Id = (Int64)child["_id"],
+                                Game = (string)child["game"],
+                                ViewerCount = (Int64)child["viewers"],
+                                Channel = new LobsterKnifeFight.Channel
+                                {
+                                    Id = (Int64)child["channel"]["_id"],
+                                    Name = (string)child["channel"]["name"],
+                                    Title = (string)child["channel"]["status"]
+                                }
+                            };
+
+                            streams.Add(stream);
+                        }
+                    }
+
+                    break;
+                case TwitchRequestResults.Unauthorized:
+                    throw new TwitchRequestUnauthorizedException();
+                    break;
             }
 
             return streams;
         }
 
-        public List<LivestreamBuddy.Stream> GetFeaturedStreams()
+        public List<LobsterKnifeFight.Stream> GetFollowedStreams(User user)
         {
-            List<LivestreamBuddy.Stream> streams = new List<Stream>();
-            JObject rawFeaturedStreams = JObject.Parse(twitchRequest.MakeRequest(RequestType.Get, "/featured", null));
-
-            if (rawFeaturedStreams["error"] != null)
+            if (string.IsNullOrEmpty(user.AccessToken))
             {
-                throw new Exception(string.Format("GetFeaturedStreams failed.  Error {0} {1}: {2}", rawFeaturedStreams["status"], rawFeaturedStreams["error"], rawFeaturedStreams["message"]));
+                throw new ArgumentNullException("AccessToken must be present for POST requests.");
             }
-            else if (rawFeaturedStreams["featured"] != null && rawFeaturedStreams["featured"].HasValues)
-            {
-                foreach (JToken child in rawFeaturedStreams["featured"].ToArray())
-                {
-                    LivestreamBuddy.Stream stream = new LivestreamBuddy.Stream
-                    {
-                        IsOnline = true,
-                        Id = (Int64)child["stream"]["_id"],
-                        Game = (string)child["stream"]["game"],
-                        ViewerCount = (Int64)child["stream"]["viewers"],
-                        Channel = new LivestreamBuddy.Channel
-                        {
-                            Id = (Int64)child["stream"]["channel"]["_id"],
-                            Name = (string)child["stream"]["channel"]["name"],
-                            Title = (string)child["stream"]["channel"]["status"]
-                        }
-                    };
 
-                    streams.Add(stream);
-                }
+            List<LobsterKnifeFight.Stream> streams = new List<LobsterKnifeFight.Stream>();
+            TwitchRequestResult result = twitchRequest.MakeRequest(RequestType.Get, "/followed", null, user.AccessToken);
+
+            switch (result.Result)
+            {
+                case TwitchRequestResults.Success:
+                    JObject rawFollowedStreams = JObject.Parse(result.Data);
+
+                    if (rawFollowedStreams["error"] != null)
+                    {
+                        throw new Exception(string.Format("GetFollowedStreams failed.  Error {0} {1}: {2}", rawFollowedStreams["status"], rawFollowedStreams["error"], rawFollowedStreams["message"]));
+                    }
+                    else if (rawFollowedStreams["streams"] != null && rawFollowedStreams["streams"].HasValues)
+                    {
+                        foreach (JToken child in rawFollowedStreams["streams"].ToArray())
+                        {
+                            LobsterKnifeFight.Stream stream = new LobsterKnifeFight.Stream
+                            {
+                                IsOnline = true,
+                                Id = (Int64)child["_id"],
+                                Game = (string)child["game"],
+                                ViewerCount = (Int64)child["viewers"],
+                                Channel = new LobsterKnifeFight.Channel
+                                {
+                                    Id = (Int64)child["channel"]["_id"],
+                                    Name = (string)child["channel"]["name"],
+                                    Title = (string)child["channel"]["status"]
+                                }
+                            };
+
+                            streams.Add(stream);
+                        }
+                    }
+
+                    break;
+                case TwitchRequestResults.Unauthorized:
+                    throw new TwitchRequestUnauthorizedException();
+                    break;
+            }
+
+            return streams;
+        }
+
+        public List<LobsterKnifeFight.Stream> GetFeaturedStreams()
+        {
+            List<LobsterKnifeFight.Stream> streams = new List<LobsterKnifeFight.Stream>();
+            TwitchRequestResult result = twitchRequest.MakeRequest(RequestType.Get, "/featured", null);
+
+            switch (result.Result)
+            {
+                case TwitchRequestResults.Success:
+                    JObject rawFeaturedStreams = JObject.Parse(result.Data);
+
+                    if (rawFeaturedStreams["error"] != null)
+                    {
+                        throw new Exception(string.Format("GetFeaturedStreams failed.  Error {0} {1}: {2}", rawFeaturedStreams["status"], rawFeaturedStreams["error"], rawFeaturedStreams["message"]));
+                    }
+                    else if (rawFeaturedStreams["featured"] != null && rawFeaturedStreams["featured"].HasValues)
+                    {
+                        foreach (JToken child in rawFeaturedStreams["featured"].ToArray())
+                        {
+                            LobsterKnifeFight.Stream stream = new LobsterKnifeFight.Stream
+                            {
+                                IsOnline = true,
+                                Id = (Int64)child["stream"]["_id"],
+                                Game = (string)child["stream"]["game"],
+                                ViewerCount = (Int64)child["stream"]["viewers"],
+                                Channel = new LobsterKnifeFight.Channel
+                                {
+                                    Id = (Int64)child["stream"]["channel"]["_id"],
+                                    Name = (string)child["stream"]["channel"]["name"],
+                                    Title = (string)child["stream"]["channel"]["status"]
+                                }
+                            };
+
+                            streams.Add(stream);
+                        }
+                    }
+
+                    break;
+                case TwitchRequestResults.Unauthorized:
+                    throw new TwitchRequestUnauthorizedException();
+                    break;
             }
 
             return streams;

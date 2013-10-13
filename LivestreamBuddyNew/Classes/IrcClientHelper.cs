@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
-using IrcDotNet;
+using Meebey.SmartIrc4net;
 
 namespace LivestreamBuddyNew
 {
@@ -14,30 +15,27 @@ namespace LivestreamBuddyNew
         private IrcClient client;
         private string username;
         private string channelName;
-
-        private bool isWaitingOnWho;
-        private List<string> whoResults;
-
-        private bool isWaitingOnUserList;
-        private List<string> userList;
+        private string accessToken;
+        private Thread workerThread;
+        private volatile bool shouldStop;
 
         # endregion
 
-        public IrcClientHelper(string channelName, string username)
+        public IrcClientHelper()
         {
-            this.channelName = channelName;
-            this.username = username;
-            this.isWaitingOnWho = false;
-            this.whoResults = new List<string>();
-            this.isWaitingOnUserList = true;
-            this.userList = new List<string>();
-
             client = new IrcClient();
-            client.TextEncoding = Encoding.UTF8;
-            client.Connected += client_Connected;
-            client.RawMessageReceived += client_RawMessageReceived;
+            client.Encoding = Encoding.UTF8;
 
-            client.Connect("irc.twitch.tv", 6667, false, new IrcUserRegistrationInfo { UserName = username, NickName = "tuffrabit", Password = "oauth:1qc1hf0ahth535j3cb43szdayecaiai" });
+            client.OnConnected += client_OnConnected;
+            client.OnChannelMessage += client_OnChannelMessage;
+            client.OnJoin += client_OnJoin;
+            client.OnPart += client_OnPart;
+            client.OnModeChange += client_OnModeChange;
+            client.OnQueryNotice += client_OnQueryNotice;
+            client.OnNames += client_OnNames;
+
+            this.workerThread = null;
+            this.shouldStop = false;
         }
 
         # region Public Methods
@@ -46,34 +44,88 @@ namespace LivestreamBuddyNew
         {
             if (this.client.IsConnected)
             {
-                this.client.SendRawMessage("PART #" + this.channelName);
+                client.RfcQuit(Priority.Critical);
             }
         }
 
-        public void SendWHO()
+        public void SendMessage(string message)
         {
-            if (this.client.IsConnected && this.isWaitingOnWho == false)
+            if (this.client.IsConnected)
             {
-                this.isWaitingOnWho = true;
-                this.client.SendRawMessage("WHO #" + this.channelName);
+                this.client.SendMessage(SendType.Message, "#" + this.channelName, message);
+            }
+        }
+
+        public void Connect(string channelName, string username, string accessToken)
+        {
+            if (!this.client.IsConnected)
+            {
+                this.shouldStop = false;
+                this.channelName = channelName;
+                this.username = username;
+                this.accessToken = accessToken;
+                this.client.Connect("irc.twitch.tv", 6667);
+            }
+            else
+            {
+                loginJoinAndStartAllTheThings();
+            }
+        }
+
+        public void Reconnect(string accessToken)
+        {
+            if (this.client.IsConnected)
+            {
+                this.accessToken = accessToken;
+                this.client.Reconnect(false);
             }
         }
 
         public void Disconnect()
         {
-            LeaveChannel();
-
-            if (this.client.IsConnected)
+            if (workerThread != null)
             {
-                this.client.Disconnect();
-            }
+                this.shouldStop = true;
+                this.client.RequestStop();
+                LeaveChannel();
+                this.workerThread.Join();
 
-            this.client.Dispose();
+                if (this.client.IsConnected)
+                {
+                    this.client.Disconnect();
+                }
+            }
         }
 
         # endregion
 
         # region Private Methods
+
+        private void loginJoinAndStartAllTheThings()
+        {
+            this.client.Login(this.username, this.username, 0, this.username, "oauth:" + this.accessToken);
+            this.client.RfcJoin("#" + this.channelName);
+
+            this.workerThread = new Thread(delegate()
+            {
+                try
+                {
+                    while (!shouldStop)
+                    {
+                        this.client.ListenOnce();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Utility.Log(this.GetType(), "loginJoinAndStartAllTheThings()", ex.Message, ex.StackTrace);
+                    DoOnError(IRCErrors.ListenThreadError);
+                }
+            });
+
+            workerThread.Start();
+            while (!workerThread.IsAlive) ;
+            Thread.Sleep(1);
+        }
 
         private string getNicknameFromRaw(string raw)
         {
@@ -102,84 +154,67 @@ namespace LivestreamBuddyNew
 
         # region Event Handlers
 
-        void client_RawMessageReceived(object sender, IrcRawMessageEventArgs e)
+        void client_OnJoin(object sender, JoinEventArgs e)
         {
-            switch (e.Message.Command)
+            if (this.username == e.Who)
             {
-                case "PRIVMSG":
-                    if (e.Message.Source.Name != "jtv")
-                    {
-                        DoOnPrivMsg(e.Message.Source.Name, e.Message.Parameters[1]);
-                    }
+                DoOnChannelJoin();
+            }
+            else
+            {
+                DoOnUserJoin(e.Who);
+            }
+        }
 
-                    break;
-                case "JOIN":
-                    string nickname = e.Message.Source.Name;
+        void client_OnPart(object sender, PartEventArgs e)
+        {
+            DoOnUserPart(e.Who);
+        }
 
-                    if (username == nickname)
-                    {
-                        DoOnChannelJoin();
-                    }
-                    else
-                    {
-                        DoOnUserJoin(nickname);
-                    }
+        void client_OnChannelMessage(object sender, IrcEventArgs e)
+        {
+            DoOnMessage(e.Data.Nick, e.Data.Message);
+        }
 
-                    break;
-                case "PART":
-                    DoOnUserPart(e.Message.Source.Name);
+        void client_OnNames(object sender, NamesEventArgs e)
+        {
+            DoOnUserListCompleted(e.UserList);
+        }
 
-                    break;
-                case "MODE":
+        void client_OnModeChange(object sender, IrcEventArgs e)
+        {
+            switch (e.Data.Type)
+            {
+                case ReceiveType.ChannelModeChange:
                     bool isModerator = false;
 
-                    if (e.Message.Parameters[1] == "+o")
+                    if (e.Data.RawMessageArray.Length >= 5)
                     {
-                        isModerator = true;
-                    }
-
-                    DoOnUserMode(e.Message.Parameters[2], isModerator);
-
-                    break;
-                case "352":
-                    if (this.isWaitingOnWho == true)
-                    {
-                        this.whoResults.Add(e.Message.Parameters[2]);
-                    }
-
-                    break;
-                case "315":
-                    this.isWaitingOnWho = false;
-                    DoOnUserListCompleted(this.whoResults.ToArray());
-                    this.whoResults.Clear();
-
-                    break;
-                case "353":
-                    if (getParametersLength(e.Message.Parameters) > 3)
-                    {
-                        foreach (string nick in e.Message.Parameters[3].Split(' '))
+                        if (e.Data.RawMessageArray[3] == "+o")
                         {
-                            this.userList.Add(nick);
+                            isModerator = true;
                         }
+
+                        DoOnUserMode(e.Data.RawMessageArray[4], isModerator);
                     }
-
-                    break;
-                case "366":
-                    this.isWaitingOnUserList = false;
-                    DoOnUserListCompleted(this.userList.ToArray());
-                    this.userList.Clear();
-
-                    break;
-                default:
-                    Console.WriteLine("<IN> - " + e.RawContent);
 
                     break;
             }
         }
 
-        void client_Connected(object sender, EventArgs e)
+        void client_OnQueryNotice(object sender, IrcEventArgs e)
         {
-            client.SendRawMessage("JOIN #" + this.channelName);
+            switch (e.Data.Message.ToLower())
+            {
+                case "login unsuccessful":
+                    DoOnError(IRCErrors.LoginUnsuccessful);
+                    break;
+            }
+        }
+
+        void client_OnConnected(object sender, EventArgs e)
+        {
+            loginJoinAndStartAllTheThings();
         }
 
         # endregion
@@ -236,13 +271,23 @@ namespace LivestreamBuddyNew
             }
         }
 
-        public delegate void PrivMsgHandler(object sender, IRCPrivMsgEventArgs e);
-        public event PrivMsgHandler OnPrivMsg;
-        private void DoOnPrivMsg(string nickname, string message)
+        public delegate void MessageHandler(object sender, IRCMessageEventArgs e);
+        public event MessageHandler OnMessage;
+        private void DoOnMessage(string nickname, string message)
         {
-            if (OnPrivMsg != null)
+            if (OnMessage != null)
             {
-                OnPrivMsg(this, new IRCPrivMsgEventArgs { Nickname = nickname, Message = message });
+                OnMessage(this, new IRCMessageEventArgs { Nickname = nickname, Message = message });
+            }
+        }
+
+        public delegate void ErrorHandler(object sender, IRCErrorEventArgs e);
+        public event ErrorHandler OnError;
+        private void DoOnError(IRCErrors error)
+        {
+            if (OnError != null)
+            {
+                OnError(this, new IRCErrorEventArgs { Error = error });
             }
         }
 
@@ -265,9 +310,14 @@ namespace LivestreamBuddyNew
         public string[] Nicknames { get; set; }
     }
 
-    public class IRCPrivMsgEventArgs : EventArgs
+    public class IRCMessageEventArgs : EventArgs
     {
         public string Nickname { get; set; }
         public string Message { get; set; }
+    }
+
+    public class IRCErrorEventArgs : EventArgs
+    {
+        public IRCErrors Error { get; set; }
     }
 }

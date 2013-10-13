@@ -11,6 +11,5 @@ C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\Newtonso
 C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\Newtonsoft.Json\bin\Release\Net40\Newtonsoft.Json.pdb
 C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\Newtonsoft.Json\bin\Release\Net40\Newtonsoft.Json.dll.CodeAnalysisLog.xml
 C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\Newtonsoft.Json\bin\Release\Net40\Newtonsoft.Json.dll.lastcodeanalysissucceeded
-C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\Newtonsoft.Json\obj\Release\Newtonsoft.Json.Net40.csprojResolveAssemblyReference.cache
 C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\Newtonsoft.Json\obj\Release\Newtonsoft.Json.dll
 C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\Newtonsoft.Json\obj\Release\Newtonsoft.Json.pdb

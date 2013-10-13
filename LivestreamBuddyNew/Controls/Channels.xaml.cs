@@ -16,7 +16,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using LivestreamBuddy;
+using LobsterKnifeFight;
 
 namespace LivestreamBuddyNew.Controls
 {
@@ -28,38 +28,22 @@ namespace LivestreamBuddyNew.Controls
         public Channels()
         {
             InitializeComponent();
-            Application.Current.MainWindow.Closing += MainWindow_Closing;
-
-            bool getFeaturedChannels = true;
-
-            foreach (string arg in Environment.GetCommandLineArgs())
-            {
-                if (string.Compare(arg, "-nofeaturedchannels", StringComparison.OrdinalIgnoreCase) == 0)
-                {
-                    getFeaturedChannels = false;
-                }
-            }
+            Dispatcher.ShutdownStarted += Dispatcher_ShutdownStarted;
 
             channels = new ObservableCollection<ChannelInfo>();
+            onlineImage = new BitmapImage(new Uri("pack://application:,,,/LivestreamBuddyNew;component/Resources/check.png"));
 
             addStreamToFavoritesList("teamxim");
 
             foreach (string channel in DataFileManager.GetFavoriteChannels())
             {
-                addStreamToFavoritesList(channel);
+                addStreamToFavoritesList(channel, true);
             }
 
             streamManager = new StreamManager();
 
-            if (getFeaturedChannels)
-            {
-                foreach (LivestreamBuddy.Stream stream in streamManager.GetFeaturedStreams())
-                {
-                    addStreamToFavoritesList(stream.Channel.Name);
-                }
-            }
-
             grdChannels.ItemsSource = channels;
+            firstReportDone = false;
 
             worker = new BackgroundWorker();
             worker.WorkerReportsProgress = true;
@@ -69,8 +53,15 @@ namespace LivestreamBuddyNew.Controls
             worker.RunWorkerAsync();
         }
 
+        public Channels(User user)
+            : this()
+        {
+            this.User = user;
+        }
+
         # region Public Properties
 
+        public User User { get; set; }
         public delegate void StreamOpenHandler(object sender, StreamOpenEventArgs e);
         public event StreamOpenHandler OnStreamOpen;
 
@@ -81,6 +72,8 @@ namespace LivestreamBuddyNew.Controls
         private ObservableCollection<ChannelInfo> channels;
         private StreamManager streamManager;
         private BackgroundWorker worker;
+        private BitmapImage onlineImage;
+        private bool firstReportDone;
 
         # endregion
 
@@ -95,9 +88,51 @@ namespace LivestreamBuddyNew.Controls
             }
         }
 
-        private void addStreamToFavoritesList(string streamName)
+        private bool streamExists(string channelName)
         {
-            channels.Add(new ChannelInfo { Name = streamName });
+            bool exists = false;
+
+            foreach (ChannelInfo channelInfo in channels)
+            {
+                if (string.Compare(channelInfo.Name, channelName, StringComparison.OrdinalIgnoreCase) == 0)
+                {
+                    exists = true;
+                    break;
+                }
+            }
+
+            return exists;
+        }
+
+        private void addStreamToFavoritesList(string streamName, bool isFavorite = false)
+        {
+            if (!streamExists(streamName))
+            {
+                channels.Add(new ChannelInfo { Name = streamName, IsFavoriteChannel = isFavorite });
+            }
+        }
+
+        private void addStreamToFavoritesList(LobsterKnifeFight.Stream stream, bool isFavorite = false)
+        {
+            if (!streamExists(stream.Channel.Name))
+            {
+                BitmapImage indicator = null;
+
+                if (stream.IsOnline)
+                {
+                    indicator = onlineImage;
+                }
+
+                channels.Add(new ChannelInfo
+                    {
+                        Name = stream.Channel.Name,
+                        StreamTitle = stream.Channel.Title,
+                        Game = stream.Game,
+                        Viewers = stream.ViewerCount.ToString(),
+                        OnlineIndicator = indicator, 
+                        IsFavoriteChannel = isFavorite
+                    });
+            }
         }
 
         private string getChannelsFromList()
@@ -115,7 +150,7 @@ namespace LivestreamBuddyNew.Controls
         private void workerCheckChannelsStatus()
         {
             string channels = getChannelsFromList();
-            List<LivestreamBuddy.Stream> streams = null;
+            List<LobsterKnifeFight.Stream> streams = null;
 
             if (!string.IsNullOrEmpty(channels))
             {
@@ -142,7 +177,7 @@ namespace LivestreamBuddyNew.Controls
             {
                 DataFileManager.AddFavoriteChannel(window.Value);
 
-                addStreamToFavoritesList(window.Value.ToLower());
+                addStreamToFavoritesList(window.Value.ToLower(), true);
             }
         }
 
@@ -160,15 +195,13 @@ namespace LivestreamBuddyNew.Controls
 
         void worker_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
-            List<LivestreamBuddy.Stream> streams = e.UserState as List<LivestreamBuddy.Stream>;
-            BitmapImage offlineImage = new BitmapImage(new Uri("pack://application:,,,/LivestreamBuddy;component/Resources/offline.png"));
-            BitmapImage onlineImage = new BitmapImage(new Uri("pack://application:,,,/LivestreamBuddy;component/Resources/online.png"));
+            List<LobsterKnifeFight.Stream> streams = e.UserState as List<LobsterKnifeFight.Stream>;
 
             foreach (ChannelInfo channel in channels)
             {
                 bool found = false;
 
-                foreach (LivestreamBuddy.Stream stream in streams)
+                foreach (LobsterKnifeFight.Stream stream in streams)
                 {
                     if (string.Compare(channel.Name, stream.Channel.Name, StringComparison.OrdinalIgnoreCase) == 0)
                     {
@@ -187,12 +220,21 @@ namespace LivestreamBuddyNew.Controls
                     channel.StreamTitle = string.Empty;
                     channel.Game = string.Empty;
                     channel.Viewers = string.Empty;
-                    channel.OnlineIndicator = offlineImage;
+                    channel.OnlineIndicator = null;
                 }
+            }
+
+            if (!firstReportDone)
+            {
+                btnShowFeaturedStreams.IsEnabled = true;
+                btnShowFollowedStreams.IsEnabled = true;
+                btnAddToFavoriteChannel.IsEnabled = true;
+                btnGoToChannel.IsEnabled = true;
+                firstReportDone = true;
             }
         }
 
-        void MainWindow_Closing(object sender, CancelEventArgs e)
+        void Dispatcher_ShutdownStarted(object sender, EventArgs e)
         {
             worker.CancelAsync();
         }
@@ -205,7 +247,7 @@ namespace LivestreamBuddyNew.Controls
             }
             else
             {
-                openStream(txtGoToChannel.Text);
+                openStream(txtGoToChannel.Text.ToLower());
             }
         }
 
@@ -215,13 +257,82 @@ namespace LivestreamBuddyNew.Controls
 
             try
             {
-                channel = channels[grdChannels.SelectedIndex];
+                channel = (ChannelInfo)grdChannels.SelectedItem;
             }
             catch { }
 
             if (channel != null)
             {
                 openStream(channel.Name);
+            }
+        }
+
+        private void ShowFeaturedStreamsClick(object sender, RoutedEventArgs e)
+        {
+            foreach (LobsterKnifeFight.Stream stream in streamManager.GetFeaturedStreams())
+            {
+                addStreamToFavoritesList(stream);
+            }
+        }
+
+        private void ShowFollowedStreamsClick(object sender, RoutedEventArgs e)
+        {
+            Utility.GetAccessToken(this.User);
+
+            try
+            {
+                if (!string.IsNullOrEmpty(User.AccessToken))
+                {
+                    foreach (LobsterKnifeFight.Stream stream in streamManager.GetFollowedStreams(this.User))
+                    {
+                        addStreamToFavoritesList(stream);
+                    }
+                }
+                else
+                {
+                    throw new Exception();
+                }
+            }
+            catch
+            {
+                Utility.ClearUserData(this.User);
+
+                MessageBox.Show("Something went wrong. Try again.");
+            }
+        }
+
+        private void RemoveChannelClick(object sender, RoutedEventArgs e)
+        {
+            if (grdChannels.SelectedIndex > -1)
+            {
+                MessageBoxResult result = MessageBox.Show("Are you sure you want to remove this channel?", "Confirm", MessageBoxButton.YesNo);
+
+                if (result == MessageBoxResult.Yes)
+                {
+                    ChannelInfo channelInfo = grdChannels.SelectedItem as ChannelInfo;
+
+                    if (string.Compare("teamxim", channelInfo.Name, StringComparison.OrdinalIgnoreCase) != 0)
+                    {
+                        if (channelInfo.IsFavoriteChannel)
+                        {
+                            DataFileManager.RemoveFavoriteChannel(channelInfo.Name);
+                        }
+
+                        channels.Remove(channelInfo);
+                    }
+                }
+            }
+        }
+
+        private void grdChannels_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (grdChannels.SelectedIndex > -1)
+            {
+                btnRemoveChannel.IsEnabled = true;
+            }
+            else
+            {
+                btnRemoveChannel.IsEnabled = false;
             }
         }
 
@@ -291,6 +402,8 @@ namespace LivestreamBuddyNew.Controls
                 RaisePropertyChanged("OnlineIndicator");
             }
         }
+
+        public bool IsFavoriteChannel { get; set; }
 
         public event PropertyChangedEventHandler PropertyChanged;
         private void RaisePropertyChanged(string caller)
