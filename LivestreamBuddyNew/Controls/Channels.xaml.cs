@@ -130,7 +130,7 @@ namespace LivestreamBuddyNew.Controls
                         Name = stream.Channel.Name,
                         StreamTitle = stream.Channel.Title,
                         Game = stream.Game,
-                        Viewers = stream.ViewerCount.ToString(),
+                        Viewers = stream.ViewerCount,
                         OnlineIndicator = indicator, 
                         IsFavoriteChannel = isFavorite
                     });
@@ -209,7 +209,7 @@ namespace LivestreamBuddyNew.Controls
                     {
                         channel.StreamTitle = stream.Channel.Title;
                         channel.Game = stream.Game;
-                        channel.Viewers = stream.ViewerCount.ToString();
+                        channel.Viewers = stream.ViewerCount;
                         channel.OnlineIndicator = onlineImage;
 
                         found = true;
@@ -221,7 +221,7 @@ namespace LivestreamBuddyNew.Controls
                 {
                     channel.StreamTitle = string.Empty;
                     channel.Game = string.Empty;
-                    channel.Viewers = string.Empty;
+                    channel.Viewers = 0;
                     channel.OnlineIndicator = offlineImage;
                 }
             }
@@ -385,8 +385,8 @@ namespace LivestreamBuddyNew.Controls
             }
         }
 
-        private string viewers = string.Empty;
-        public string Viewers
+        private long viewers = 0;
+        public long Viewers
         {
             get { return viewers; }
             set

@@ -8,7 +8,7 @@
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>LivestreamBuddyNew</RootNamespace>
-    <AssemblyName>LivestreamBuddyNew</AssemblyName>
+    <AssemblyName>LivestreamBuddy</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -184,6 +184,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="FlatFiles\chat.html" />
+    <Content Include="FlatFiles\help.html" />
     <Content Include="FlatFiles\viewStream.html" />
     <Content Include="Plugins\NPSWF32_11_8_800_94.dll" />
     <Resource Include="Resources\grayX.png" />
@@ -193,7 +194,8 @@
   <PropertyGroup>
     <PostBuildEvent>xcopy "$(SolutionDir)LivestreamBuddyNew\FlatFiles\GameAutoComplete.txt" "$(TargetDir)" /Y
 xcopy "$(SolutionDir)LivestreamBuddyNew\FlatFiles\Emoticons.txt" "$(TargetDir)" /Y
-xcopy "$(SolutionDir)LivestreamBuddyNew\Plugins\NPSWF32_11_8_800_94.dll" "$(TargetDir)" /Y</PostBuildEvent>
+xcopy "$(SolutionDir)LivestreamBuddyNew\Plugins\NPSWF32_11_8_800_94.dll" "$(TargetDir)" /Y
+xcopy "$(SolutionDir)LivestreamBuddyNew\FlatFiles\help.html" "$(TargetDir)" /Y</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -141,6 +141,11 @@ namespace LivestreamBuddyNew
 
                 this.Close();
             }
+            else if (e.Url.Host.ToLower().Contains("google"))
+            {
+                this.DialogResult = false;
+                this.Close();
+            }
         }
 
         # endregion

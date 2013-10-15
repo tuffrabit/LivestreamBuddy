@@ -11,7 +11,8 @@
     </Window.Background>
     <Border Padding="13 13 13 13">
         <DockPanel>
-            <TabControl Name="mainTabs">
+            <Button DockPanel.Dock="Bottom" Height="24" Width="200" Margin="0 7 0 0" Click="HelpClick">Help / FAQ</Button>
+            <TabControl Name="mainTabs" DockPanel.Dock="Top">
                 <TabItem Header="Channels">
                     <controls:Channels x:Name="channelsControl"></controls:Channels>
                 </TabItem>

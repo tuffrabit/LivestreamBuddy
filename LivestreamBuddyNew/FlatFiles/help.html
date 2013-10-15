@@ -1,0 +1,41 @@
+﻿<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <title>LivestreamBuddy Alpha 007 Help</title>
+</head>
+<body>
+    <h1>FAQ</h1>
+    <br />
+    <div>
+        <h3>Why do the viewer counts in the stream feed and the viewer list not match?</h3>
+        <p>The viewer list count comes from IRC and only shows logged in viewers.  The stream feed count comes from Twitch and shows both logged in and anonymous viewers.</p>
+    </div>
+    <br />
+    <div>
+        <h3>Why does it sometimes take a few moments before my viewer list populates?</h3>
+        <p>The chat and viewer list utilize Twitch's IRC servers.  Sometimes, when they are under high load, they will take a few moments to return data.</p>
+    </div>
+    <br />
+    <div>
+        <h3>What should I do if I find a bug or have a feature request?</h3>
+        <p>Go <a href="https://sourceforge.net/projects/livestreambuddy/" target="_blank">here</a> and use the "Tracking" feature, there should be a button or tab or something... you probably need to be logged into SourceForge.</p>
+    </div>
+    <br />
+    <div>
+        <h3>I entered a bug or feature request using SourceForge's "Tracking" feature like you told me to.  Why isn't it done yet?</h3>
+        <p>I'm lazy.  You want it done faster?  There's a donate button.  Money makes me go faster.</p>
+    </div>
+    <br />
+    <div>
+        <h3>Why is LivestreamBuddy all of a sudden using so much memory and CPU?</h3>
+        <p>The chat now displays emoticon images.  This has the potential to be resource intensive on slower machines.  You can disable it by running LivestreamBuddy with the -noemote flag.</p>
+    </div>
+    <br />
+    <div>
+        <h3>I see some chat text that should be emoticons.  How do I make that text show up as emoticons?</h3>
+        <p>LivestreamBuddy stores a list of emoticons from Twitch.  Twitch may update that list on their servers periodically.  You can force LivestreamBuddy to obtain a new list from Twitch by running with the -refreshemoticons flag.</p>
+    </div>
+</body>
+</html>

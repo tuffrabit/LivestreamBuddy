@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -197,6 +198,12 @@ namespace LivestreamBuddyNew
                     MessageBox.Show("Something went wrong. Try again.");
                 }
             }
+        }
+
+        private void HelpClick(object sender, RoutedEventArgs e)
+        {
+            ProcessStartInfo sInfo = new ProcessStartInfo("help.html");
+            Process.Start(sInfo);
         }
 
         # endregion

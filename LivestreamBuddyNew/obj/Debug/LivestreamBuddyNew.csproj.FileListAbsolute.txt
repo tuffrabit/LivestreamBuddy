@@ -74,3 +74,4 @@ C:\dev\LivestreamBuddy\LivestreamBuddyNew\obj\Debug\LivestreamBuddyNew.Propertie
 C:\dev\LivestreamBuddy\LivestreamBuddyNew\obj\Debug\LivestreamBuddyNew.csproj.GenerateResource.Cache
 C:\dev\LivestreamBuddy\LivestreamBuddyNew\bin\Debug\LivestreamBuddyNew.exe
 C:\dev\LivestreamBuddy\LivestreamBuddyNew\bin\Debug\LivestreamBuddyNew.pdb
+C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\LivestreamBuddyNew\bin\Debug\LivestreamBuddy.exe.config
