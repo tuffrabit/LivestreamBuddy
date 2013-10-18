@@ -143,7 +143,7 @@ namespace LivestreamBuddyNew
                                 Content = stream
                             };
 
-                            tab.Closing += delegate(object tabClosingSender, EventArgs tabClosingArgs)
+                            tab.Closed += delegate(object tabClosedSender, EventArgs tabClosedArgs)
                             {
                                 visibleStreams.Remove(e.ChannelName);
                                 stream.Disconnect();
@@ -177,7 +177,7 @@ namespace LivestreamBuddyNew
                                 Content = new Border { Padding = new Thickness(13, 13, 13, 13), Child = stream }
                             };
 
-                            newWindow.Closing += delegate(object windowClosingSender, System.ComponentModel.CancelEventArgs windowClosingArgs)
+                            newWindow.Closed += delegate(object windowClosedSender, EventArgs windowClosedArgs)
                             {
                                 visibleStreams.Remove(e.ChannelName);
                                 stream.Disconnect();

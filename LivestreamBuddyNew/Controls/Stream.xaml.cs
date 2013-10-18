@@ -38,6 +38,7 @@ namespace LivestreamBuddyNew.Controls
             urlRegex = new Regex(@"(?i)\b((?:[a-z][\w-]+:(?:/{1,3}|[a-z0-9%])|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'.,<>?«»“”‘’]))", RegexOptions.Compiled);
             excludeList = new List<string>();
 
+            webViewStream.ViewType = WebViewType.Window;
             webViewStream.SizeChanged += webViewStream_SizeChanged;
 
             webChat.NativeViewInitialized += webChat_NativeViewInitialized;
@@ -75,6 +76,7 @@ namespace LivestreamBuddyNew.Controls
             {
                 pnlWebViewStream.Visibility = System.Windows.Visibility.Collapsed;
                 btnShowHideViewStream.Content = "Show";
+                pnlWebViewStreamPreviousHeight = pnlWebViewStreamMinimumHeight;
             }
         }
 
@@ -208,6 +210,7 @@ namespace LivestreamBuddyNew.Controls
         {
             if (!show)
             {
+                pnlWebViewStreamPreviousHeight = pnlWebViewStream.ActualHeight;
                 pnlWebViewStream.Visibility = System.Windows.Visibility.Collapsed;
                 webViewStream.LoadHTML("<html><head></head><body></body></html>");
                 btnShowHideViewStream.Content = "Show";
@@ -216,8 +219,26 @@ namespace LivestreamBuddyNew.Controls
             {
                 pnlWebViewStream.Visibility = System.Windows.Visibility.Visible;
                 webViewStreamLoadHTML();
+
+                if (pnlWebViewStreamPreviousHeight == 0)
+                {
+                    pnlWebViewStreamPreviousHeight = pnlMainDock.ActualHeight * .469;
+                }
+                else if (pnlWebViewStreamPreviousHeight < pnlWebViewStreamMinimumHeight)
+                {
+                    pnlWebViewStreamPreviousHeight = pnlWebViewStreamMinimumHeight;
+                }
+
+                setWebViewStreamHeight(pnlWebViewStreamPreviousHeight);
                 btnShowHideViewStream.Content = "Hide";
             }
+        }
+
+        private void setWebViewStreamHeight(double height)
+        {
+            webViewStream.DocumentReady += webViewStream_DocumentReady;
+            pnlWebViewStream.Height = height;
+            webViewStream.Height = height;
         }
 
         # endregion
@@ -237,6 +258,8 @@ namespace LivestreamBuddyNew.Controls
         private Regex urlRegex;
         private List<Emoticon> emoticons;
         private List<string> excludeList;
+        private const double pnlWebViewStreamMinimumHeight = 245;
+        private double pnlWebViewStreamPreviousHeight;
 
         # endregion
 
@@ -258,7 +281,12 @@ namespace LivestreamBuddyNew.Controls
         void webViewStream_DocumentReady(object sender, UrlEventArgs e)
         {
             webViewStream.DocumentReady -= webViewStream_DocumentReady;
-            webViewStream.ExecuteJavascript("resizePlayer(-1, -1)");
+
+            try
+            {
+                webViewStream.ExecuteJavascript("resizePlayer(-1, -1)");
+            }
+            catch { }
         }
 
         void webChat_SizeChanged(object sender, SizeChangedEventArgs e)
@@ -488,15 +516,19 @@ namespace LivestreamBuddyNew.Controls
             newWindow.Show();
         }
 
-        private void DockPanel_SizeChanged_1(object sender, SizeChangedEventArgs e)
+        private void pnlMainDock_SizeChanged(object sender, SizeChangedEventArgs e)
         {
             if (e.PreviousSize.Height > 0)
             {
-                double newHeight = pnlWebViewStream.ActualHeight + (e.NewSize.Height - e.PreviousSize.Height);
+                double newHeight = e.NewSize.Height * .469;
 
-                if (newHeight > 245)
+                if (newHeight >= pnlWebViewStreamMinimumHeight)
                 {
-                    pnlWebViewStream.Height = newHeight;
+                    setWebViewStreamHeight(newHeight);
+                }
+                else
+                {
+                    setWebViewStreamHeight(pnlWebViewStreamMinimumHeight);
                 }
             }
         }
@@ -504,6 +536,54 @@ namespace LivestreamBuddyNew.Controls
         private void btnShowHideViewStream_Click(object sender, RoutedEventArgs e)
         {
             showHideStreamFeed(!pnlWebViewStream.IsVisible);
+        }
+
+        private void RunCommercial(object sender, RoutedEventArgs e)
+        {
+            Utility.GetAccessToken(this.user);
+
+            try
+            {
+                if (!string.IsNullOrEmpty(this.user.AccessToken))
+                {
+                    ChannelManager channelManager = new ChannelManager();
+
+                    try
+                    {
+                        CommercialLength length = CommercialLength.SixtySeconds;
+
+                        switch (cmbCommercialLength.SelectedIndex)
+                        {
+                            case 0:
+                                length = CommercialLength.ThirtySeconds;
+                                break;
+                            case 1:
+                                length = CommercialLength.SixtySeconds;
+                                break;
+                            case 2:
+                                length = CommercialLength.NinetySeconds;
+                                break;
+                        }
+
+                        channelManager.RunCommercial(user, this.channelName, length);
+                        MessageBox.Show("Running commercial.");
+                    }
+                    catch
+                    {
+                        MessageBox.Show("Commercial run failed.");
+                    }
+                }
+                else
+                {
+                    throw new Exception();
+                }
+            }
+            catch
+            {
+                Utility.ClearUserData(this.user);
+
+                MessageBox.Show("Something went wrong. Try again.");
+            }
         }
 
         # endregion

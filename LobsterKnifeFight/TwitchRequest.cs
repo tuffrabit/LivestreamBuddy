@@ -40,7 +40,7 @@ namespace LobsterKnifeFight
 
         private void writeDataToRequest(ref HttpWebRequest request, string data)
         {
-            byte[] dataBuffer = System.Text.Encoding.UTF8.GetBytes(data);
+            byte[] dataBuffer = System.Text.Encoding.ASCII.GetBytes(data);
             request.ContentLength = dataBuffer.Length;
 
             using (System.IO.Stream dataStream = request.GetRequestStream())

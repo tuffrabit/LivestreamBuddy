@@ -9,6 +9,7 @@
 //------------------------------------------------------------------------------
 
 [assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("flatfiles/chat.html")]
+[assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("flatfiles/help.html")]
 [assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("flatfiles/viewstream.html")]
 [assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("plugins/npswf32_11_8_800_94.dll")]
 

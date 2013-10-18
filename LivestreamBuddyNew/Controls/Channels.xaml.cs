@@ -116,7 +116,7 @@ namespace LivestreamBuddyNew.Controls
 
         private void addStreamToFavoritesList(LobsterKnifeFight.Stream stream, bool isFavorite = false)
         {
-            if (!streamExists(stream.Channel.Name))
+            if (stream.Channel != null && !streamExists(stream.Channel.Name))
             {
                 BitmapImage indicator = offlineImage;
 
@@ -178,8 +178,16 @@ namespace LivestreamBuddyNew.Controls
             if ((bool)window.ShowDialog())
             {
                 DataFileManager.AddFavoriteChannel(window.Value);
+                LobsterKnifeFight.Stream stream = streamManager.GetStream(window.Value.ToLower());
 
-                addStreamToFavoritesList(window.Value.ToLower(), true);
+                if (stream.IsOnline)
+                {
+                    addStreamToFavoritesList(stream, true);
+                }
+                else
+                {
+                    addStreamToFavoritesList(window.Value.ToLower(), true);
+                }
             }
         }
 
@@ -259,7 +267,10 @@ namespace LivestreamBuddyNew.Controls
 
             try
             {
-                channel = (ChannelInfo)grdChannels.SelectedItem;
+                if (grdChannels.SelectedItems.Count > 0)
+                {
+                    channel = (ChannelInfo)grdChannels.SelectedItems[0];
+                }
             }
             catch { }
 
@@ -305,21 +316,29 @@ namespace LivestreamBuddyNew.Controls
 
         private void RemoveChannelClick(object sender, RoutedEventArgs e)
         {
-            if (grdChannels.SelectedIndex > -1)
+            if (grdChannels.SelectedItems.Count > 0)
             {
-                MessageBoxResult result = MessageBox.Show("Are you sure you want to remove this channel?", "Confirm", MessageBoxButton.YesNo);
+                MessageBoxResult result = MessageBox.Show("Are you sure you want to remove the selected channel(s)?", "Confirm", MessageBoxButton.YesNo);
 
                 if (result == MessageBoxResult.Yes)
                 {
-                    ChannelInfo channelInfo = grdChannels.SelectedItem as ChannelInfo;
+                    List<ChannelInfo> channelsToRemove = new List<ChannelInfo>();
 
-                    if (string.Compare("teamxim", channelInfo.Name, StringComparison.OrdinalIgnoreCase) != 0)
+                    foreach (ChannelInfo channelInfo in grdChannels.SelectedItems)
                     {
-                        if (channelInfo.IsFavoriteChannel)
+                        if (string.Compare("teamxim", channelInfo.Name, StringComparison.OrdinalIgnoreCase) != 0)
                         {
-                            DataFileManager.RemoveFavoriteChannel(channelInfo.Name);
-                        }
+                            if (channelInfo.IsFavoriteChannel)
+                            {
+                                DataFileManager.RemoveFavoriteChannel(channelInfo.Name);
+                            }
 
+                            channelsToRemove.Add(channelInfo);
+                        }
+                    }
+
+                    foreach (ChannelInfo channelInfo in channelsToRemove)
+                    {
                         channels.Remove(channelInfo);
                     }
                 }

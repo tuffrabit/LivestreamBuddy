@@ -75,7 +75,7 @@ namespace LivestreamBuddyNew.Controls {
                 return;
             }
             _contentLoaded = true;
-            System.Uri resourceLocater = new System.Uri("/LivestreamBuddy;component/controls/giveaway.xaml", System.UriKind.Relative);
+            System.Uri resourceLocater = new System.Uri("/LivestreamBuddyNew;component/controls/giveaway.xaml", System.UriKind.Relative);
             
             #line 1 "..\..\..\Controls\Giveaway.xaml"
             System.Windows.Application.LoadComponent(this, resourceLocater);

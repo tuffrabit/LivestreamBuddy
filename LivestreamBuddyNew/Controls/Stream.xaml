@@ -8,7 +8,7 @@
     <Border Padding="3 3 3 3">
             <TabControl>
                 <TabItem Header="Chat / View">
-                <DockPanel LastChildFill="True" SizeChanged="DockPanel_SizeChanged_1">
+                <DockPanel Name="pnlMainDock" LastChildFill="True" SizeChanged="pnlMainDock_SizeChanged">
                     <TextBox Name="txtMessage" DockPanel.Dock="Bottom" Margin="0 7 0 0" KeyDown="txtMessage_KeyDown" />
                     <DockPanel Name="pnlWebViewStream" DockPanel.Dock="Top" MinHeight="245">
                         <my:WebControl Name="webViewStream" Margin="0 0 0 7" />
@@ -30,6 +30,7 @@
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" />
@@ -39,6 +40,12 @@
                         <Controls:AutoCompleteBox Grid.Row="0" Grid.Column="1" Name="txtStreamTitle" Height="22" Width="200" ItemsSource="{Binding TitleAutoCompleteOptions}" />
                         <Label Grid.Row="1" Grid.Column="0">Game:</Label>
                         <Controls:AutoCompleteBox Grid.Row="1" Grid.Column="1" Name="txtStreamGame" Height="22" Width="200" ItemsSource="{Binding GameAutoCompleteOptions}" />
+                        <Button Grid.Row="2" Grid.Column="0" Padding="3 3 3 3" Margin="0 0 7 0" Click="RunCommercial">Run commercial for</Button>
+                        <ComboBox Name="cmbCommercialLength" Grid.Row="2" Grid.Column="1">
+                            <ComboBoxItem>30 Seconds</ComboBoxItem>
+                            <ComboBoxItem>60 Seconds</ComboBoxItem>
+                            <ComboBoxItem>90 Seconds</ComboBoxItem>
+                        </ComboBox>
                     </Grid>
                     <Button DockPanel.Dock="Top" Height="22" Click="UpdateStreamClick" Margin="0 0 0 7">Update</Button>
                     <Button DockPanel.Dock="Top" Height="22" Click="GiveawayClick">Giveaway</Button>

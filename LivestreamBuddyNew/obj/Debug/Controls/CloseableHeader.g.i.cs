@@ -67,7 +67,7 @@ namespace LivestreamBuddyNew.Controls {
                 return;
             }
             _contentLoaded = true;
-            System.Uri resourceLocater = new System.Uri("/LivestreamBuddy;component/controls/closeableheader.xaml", System.UriKind.Relative);
+            System.Uri resourceLocater = new System.Uri("/LivestreamBuddyNew;component/controls/closeableheader.xaml", System.UriKind.Relative);
             
             #line 1 "..\..\..\Controls\CloseableHeader.xaml"
             System.Windows.Application.LoadComponent(this, resourceLocater);

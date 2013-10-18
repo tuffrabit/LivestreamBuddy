@@ -28,15 +28,6 @@ C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\Livestre
 C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\LivestreamBuddyNew\obj\Debug\MainWindow.baml
 C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\LivestreamBuddyNew\obj\Debug\LivestreamBuddyNew.Properties.Resources.resources
 C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\LivestreamBuddyNew\obj\Debug\LivestreamBuddyNew.csproj.GenerateResource.Cache
-C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\LivestreamBuddyNew\bin\Debug\LivestreamBuddyNew.exe.config
-C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\LivestreamBuddyNew\bin\Debug\LivestreamBuddyNew.exe
-C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\LivestreamBuddyNew\bin\Debug\LivestreamBuddyNew.pdb
-C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\LivestreamBuddyNew\obj\Debug\LivestreamBuddyNew_Content.g.cs
-C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\LivestreamBuddyNew\obj\Debug\LivestreamBuddyNew_MarkupCompile.cache
-C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\LivestreamBuddyNew\obj\Debug\LivestreamBuddyNew_MarkupCompile.lref
-C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\LivestreamBuddyNew\obj\Debug\LivestreamBuddyNew.g.resources
-C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\LivestreamBuddyNew\obj\Debug\LivestreamBuddyNew.exe
-C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\LivestreamBuddyNew\obj\Debug\LivestreamBuddyNew.pdb
 C:\dev\LivestreamBuddy\LivestreamBuddyNew\bin\Debug\LivestreamBuddyNew.exe.config
 C:\dev\LivestreamBuddy\LivestreamBuddyNew\obj\Debug\LivestreamBuddyNew.exe
 C:\dev\LivestreamBuddy\LivestreamBuddyNew\obj\Debug\LivestreamBuddyNew.pdb
@@ -74,4 +65,12 @@ C:\dev\LivestreamBuddy\LivestreamBuddyNew\obj\Debug\LivestreamBuddyNew.Propertie
 C:\dev\LivestreamBuddy\LivestreamBuddyNew\obj\Debug\LivestreamBuddyNew.csproj.GenerateResource.Cache
 C:\dev\LivestreamBuddy\LivestreamBuddyNew\bin\Debug\LivestreamBuddyNew.exe
 C:\dev\LivestreamBuddy\LivestreamBuddyNew\bin\Debug\LivestreamBuddyNew.pdb
-C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\LivestreamBuddyNew\bin\Debug\LivestreamBuddy.exe.config
+C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\LivestreamBuddyNew\bin\Debug\LivestreamBuddyNew.exe.config
+C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\LivestreamBuddyNew\bin\Debug\LivestreamBuddyNew.exe
+C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\LivestreamBuddyNew\bin\Debug\LivestreamBuddyNew.pdb
+C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\LivestreamBuddyNew\obj\Debug\LivestreamBuddyNew_Content.g.cs
+C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\LivestreamBuddyNew\obj\Debug\LivestreamBuddyNew_MarkupCompile.cache
+C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\LivestreamBuddyNew\obj\Debug\LivestreamBuddyNew_MarkupCompile.lref
+C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\LivestreamBuddyNew\obj\Debug\LivestreamBuddyNew.g.resources
+C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\LivestreamBuddyNew\obj\Debug\LivestreamBuddyNew.exe
+C:\Users\rboucher\Documents\Visual Studio 2012\Projects\LivestreamBuddy\LivestreamBuddyNew\obj\Debug\LivestreamBuddyNew.pdb

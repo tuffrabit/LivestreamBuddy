@@ -82,6 +82,7 @@ namespace LivestreamBuddyNew
         {
             DoClosing();
             ((TabControl)this.Parent).Items.Remove(this);
+            DoClosed();
         }
         // Label SizeChanged - When the Size of the Label changes
         // (due to setting the Title) set position of button properly
@@ -98,6 +99,16 @@ namespace LivestreamBuddyNew
             if (Closing != null)
             {
                 Closing(this, null);
+            }
+        }
+
+        public delegate void ClosedHandler(object sender, EventArgs e);
+        public event ClosedHandler Closed;
+        private void DoClosed()
+        {
+            if (Closed != null)
+            {
+                Closed(this, null);
             }
         }
     }
