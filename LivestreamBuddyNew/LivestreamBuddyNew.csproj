@@ -73,12 +73,16 @@
     <Compile Include="Classes\ClosableTab.cs" />
     <Compile Include="Classes\DataFileManager.cs" />
     <Compile Include="Classes\IrcClientHelper.cs" />
+    <Compile Include="Classes\Options.cs" />
     <Compile Include="Classes\Utility.cs" />
     <Compile Include="Controls\CloseableHeader.xaml.cs">
       <DependentUpon>CloseableHeader.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\Giveaway.xaml.cs">
       <DependentUpon>Giveaway.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\Options.xaml.cs">
+      <DependentUpon>Options.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\Stream.xaml.cs">
       <DependentUpon>Stream.xaml</DependentUpon>
@@ -100,6 +104,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Controls\Giveaway.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\Options.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -195,7 +203,8 @@
     <PostBuildEvent>xcopy "$(SolutionDir)LivestreamBuddyNew\FlatFiles\GameAutoComplete.txt" "$(TargetDir)" /Y
 xcopy "$(SolutionDir)LivestreamBuddyNew\FlatFiles\Emoticons.txt" "$(TargetDir)" /Y
 xcopy "$(SolutionDir)LivestreamBuddyNew\Plugins\NPSWF32_11_8_800_94.dll" "$(TargetDir)" /Y
-xcopy "$(SolutionDir)LivestreamBuddyNew\FlatFiles\help.html" "$(TargetDir)" /Y</PostBuildEvent>
+xcopy "$(SolutionDir)LivestreamBuddyNew\FlatFiles\help.html" "$(TargetDir)" /Y
+"C:\Program Files\7-Zip\7z.exe" a -tzip "$(SolutionDir)LivestreamBuddyNew$(ConfigurationName).zip" "$(TargetDir)*" -x!*.pdb -x!*.manifest -x!*.config -x!*.vshost.exe -x!*.xml -x!debug.log -x!FavoriteChannels.txt -x!Identities.txt -x!Options.txt</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

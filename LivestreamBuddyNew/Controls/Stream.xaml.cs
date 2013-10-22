@@ -49,6 +49,7 @@ namespace LivestreamBuddyNew.Controls
             string channelName,
             string accessToken,
             bool showStreamFeed,
+            bool showTimestampsInChat,
             string[] potentialNicknameColors,
             List<string> streamTitleAutoCompleteOptions,
             List<string> streamGameAutoCompleteOptions,
@@ -58,6 +59,7 @@ namespace LivestreamBuddyNew.Controls
             this.user = user;
             this.channelName = channelName;
             this.accessToken = accessToken;
+            this.showTimestampsInChat = showTimestampsInChat;
             this.potentialNicknameColors = potentialNicknameColors;
             this.streamTitleAutoCompleteOptions = streamTitleAutoCompleteOptions;
             this.streamGameAutoCompleteOptions = streamGameAutoCompleteOptions;
@@ -197,6 +199,13 @@ namespace LivestreamBuddyNew.Controls
                 }
             }
 
+            if (this.showTimestampsInChat)
+            {
+                DateTime now = DateTime.Now;
+
+                nickname = string.Format("[{0}]{1}", now.ToString("H:mm"), nickname);
+            }
+
             webChat.ExecuteJavascript("chatMessage(\"" + nickname + "\", \"" + message + "\", \"" + nickColor + "\");");
         }
 
@@ -248,6 +257,7 @@ namespace LivestreamBuddyNew.Controls
         private User user;
         private string channelName;
         private string accessToken;
+        private bool showTimestampsInChat;
         private IrcClientHelper client;
         private StreamViewModel viewModel;
         private string[] potentialNicknameColors;

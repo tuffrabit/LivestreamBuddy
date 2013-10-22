@@ -26,6 +26,8 @@ namespace LivestreamBuddyNew
             InitializeComponent();
 
             this.saveAccessToken = true;
+            this.isTwitchLoaded = false;
+            this.windowClosed = false;
 
             webBrowser.NativeViewInitialized += webBrowser_NativeViewInitialized;
             webBrowser.DocumentReady += webBrowser_DocumentReady;
@@ -51,6 +53,8 @@ namespace LivestreamBuddyNew
 
         private User user;
         private bool saveAccessToken;
+        private bool isTwitchLoaded;
+        private bool windowClosed;
 
         # endregion
 
@@ -139,12 +143,25 @@ namespace LivestreamBuddyNew
                     this.DialogResult = false;
                 }
 
+                this.windowClosed = true;
                 this.Close();
             }
-            else if (e.Url.Host.ToLower().Contains("google"))
+            else if (e.Url.Host.ToLower().Contains("twitch"))
+            {
+                this.isTwitchLoaded = true;
+            }
+            else if (e.Url.Host.ToLower().Contains("google") && !this.windowClosed)
             {
                 this.DialogResult = false;
                 this.Close();
+            }
+        }
+
+        private void Window_Closing_1(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            if (!this.isTwitchLoaded)
+            {
+                e.Cancel = true;
             }
         }
 

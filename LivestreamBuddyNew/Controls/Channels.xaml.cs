@@ -85,7 +85,7 @@ namespace LivestreamBuddyNew.Controls
         {
             if (OnStreamOpen != null)
             {
-                StreamOpenEventArgs args = new StreamOpenEventArgs { ChannelName = channelName.Trim(), OpenInNewTab = (bool)chkStreamOpenStyle.IsChecked, ShowStreamFeed = (bool)chkStreamViewShow.IsChecked };
+                StreamOpenEventArgs args = new StreamOpenEventArgs { ChannelName = channelName.Trim() };
                 OnStreamOpen(this, args);
             }
         }
@@ -363,10 +363,6 @@ namespace LivestreamBuddyNew.Controls
     public class StreamOpenEventArgs : EventArgs
     {
         public string ChannelName { get; set; }
-
-        public bool OpenInNewTab { get; set; }
-
-        public bool ShowStreamFeed { get; set; }
     }
 
     public class ChannelInfo : INotifyPropertyChanged

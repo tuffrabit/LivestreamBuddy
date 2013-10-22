@@ -15,7 +15,8 @@ namespace LivestreamBuddyNew
         private const string gameAutoCompleteFileName = "GameAutoComplete.txt";
         private const string emoticonsCacheFileName = "Emoticons.txt";
         private const string favoriteChannelsFileName = "FavoriteChannels.txt";
-        private const string identitiesFileName = "identities.txt";
+        private const string identitiesFileName = "Identities.txt";
+        private const string optionsFileName = "Options.txt";
 
         public static string[] GetFavoriteChannels()
         {
@@ -276,6 +277,68 @@ namespace LivestreamBuddyNew
             }
 
             return emoticons;
+        }
+
+        public static Options GetOptions()
+        {
+            // Defaults
+            Options options = new Options();
+
+            using (FileStream stream = File.Open(optionsFileName, FileMode.OpenOrCreate))
+            {
+                using (StreamReader reader = new StreamReader(stream))
+                {
+                    string line;
+                    while ((line = reader.ReadLine()) != null)
+                    {
+                        string[] values = line.Split(' ');
+                        bool temp;
+
+                        if (values.Length >= 2)
+                        {
+                            switch (values[0].ToLower())
+                            {
+                                case "openstreamsinnewtab":
+                                    if (bool.TryParse(values[1], out temp))
+                                    {
+                                        options.OpenStreamsInNewTab = temp;
+                                    }
+
+                                    break;
+                                case "showstreamfeedwhenopening":
+                                    if (bool.TryParse(values[1], out temp))
+                                    {
+                                        options.ShowStreamFeedWhenOpening = temp;
+                                    }
+
+                                    break;
+                                case "showtimestampsinchat":
+                                    if (bool.TryParse(values[1], out temp))
+                                    {
+                                        options.ShowTimestampsInChat = temp;
+                                    }
+
+                                    break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            return options;
+        }
+
+        public static void SetOptions(Options options)
+        {
+            if (options != null)
+            {
+                using (StreamWriter writer = File.CreateText(optionsFileName))
+                {
+                    writer.WriteLine("OpenStreamsInNewTab " + (options.OpenStreamsInNewTab ? "true" : "false"));
+                    writer.WriteLine("ShowStreamFeedWhenOpening " + (options.ShowStreamFeedWhenOpening ? "true" : "false"));
+                    writer.WriteLine("ShowTimestampsInChat " + (options.ShowTimestampsInChat ? "true" : "false"));
+                }
+            }
         }
     }
 }

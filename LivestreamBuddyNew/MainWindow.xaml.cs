@@ -36,6 +36,7 @@ namespace LivestreamBuddyNew
 
             visibleStreams = new List<string>();
             user = DataFileManager.GetUser();
+            userOptions = DataFileManager.GetOptions();
 
             channelsControl.User = this.user;
             channelsControl.OnStreamOpen += channelsControl_OnStreamOpen;
@@ -84,6 +85,7 @@ namespace LivestreamBuddyNew
 
         private List<string> visibleStreams;
         private User user;
+        private Options userOptions;
         private string[] potentialNicknameColors;
         private List<string> streamTitleAutoCompleteOptions;
         private List<string> streamGameAutoCompleteOptions;
@@ -125,12 +127,13 @@ namespace LivestreamBuddyNew
                     {
                         visibleStreams.Add(e.ChannelName);
 
-                        if (e.OpenInNewTab)
+                        if (this.userOptions.OpenStreamsInNewTab)
                         {
                             Controls.Stream stream = new Controls.Stream(this.user, 
                                 e.ChannelName, 
                                 this.user.AccessToken,
-                                e.ShowStreamFeed, 
+                                this.userOptions.ShowStreamFeedWhenOpening, 
+                                this.userOptions.ShowTimestampsInChat, 
                                 this.potentialNicknameColors, 
                                 this.streamTitleAutoCompleteOptions, 
                                 this.streamGameAutoCompleteOptions, 
@@ -155,8 +158,9 @@ namespace LivestreamBuddyNew
                         {
                             Controls.Stream stream = new Controls.Stream(this.user, 
                                 e.ChannelName, 
-                                this.user.AccessToken, 
-                                e.ShowStreamFeed, 
+                                this.user.AccessToken,
+                                this.userOptions.ShowStreamFeedWhenOpening,
+                                this.userOptions.ShowTimestampsInChat, 
                                 this.potentialNicknameColors, 
                                 this.streamTitleAutoCompleteOptions,
                                 this.streamGameAutoCompleteOptions,
@@ -194,7 +198,6 @@ namespace LivestreamBuddyNew
                 catch
                 {
                     Utility.ClearUserData(this.user);
-
                     MessageBox.Show("Something went wrong. Try again.");
                 }
             }
@@ -204,6 +207,32 @@ namespace LivestreamBuddyNew
         {
             ProcessStartInfo sInfo = new ProcessStartInfo("help.html");
             Process.Start(sInfo);
+        }
+
+        private void OptionsClick(object sender, RoutedEventArgs e)
+        {
+            Controls.Options optionsControl = new Controls.Options();
+            IconBitmapDecoder ibd = new IconBitmapDecoder(new Uri("pack://application:,,,/LivestreamBuddyNew;component/livestream-ICON.ico"), BitmapCreateOptions.None, BitmapCacheOption.Default);
+            LinearGradientBrush brush = new LinearGradientBrush((Color)ColorConverter.ConvertFromString("#FF515151"), Colors.LightGray, new Point(.5, 0), new Point(.5, 1));
+            Window newWindow = new Window
+            {
+                Width = 325,
+                MinWidth = 325,
+                Height = 375,
+                MinHeight = 375,
+                Title = "Options",
+                Icon = ibd.Frames[0],
+                Background = brush,
+                Content = new Border { Padding = new Thickness(13, 13, 13, 13), Child = optionsControl }
+            };
+
+            optionsControl.OnSaved += delegate(object optionsOnSavedSender, EventArgs optionsOnSavedArgs)
+            {
+                this.userOptions = optionsControl.UserOptions;
+                newWindow.Close();
+            };
+
+            newWindow.Show();
         }
 
         # endregion

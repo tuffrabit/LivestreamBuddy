@@ -78,8 +78,6 @@
                 <Button Name="btnGoToChannel" IsEnabled="False" Margin="0 0 3 0" Width="125" Click="btnGoToChannel_Click">Go To Channel:</Button>
                 <TextBox Name="txtGoToChannel" />
             </DockPanel>
-            <CheckBox Name="chkStreamOpenStyle" IsChecked="True">Open streams in new tab</CheckBox>
-            <CheckBox Name="chkStreamViewShow" IsChecked="True">Show stream feed when opening</CheckBox>
         </StackPanel>
     </Border>
 </UserControl>

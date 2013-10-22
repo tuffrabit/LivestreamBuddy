@@ -57,6 +57,7 @@ namespace LobsterKnifeFight
             {
                 string requestUrl = string.Format("https://api.twitch.tv/kraken/{0}{1}", RequestDomain, data);
                 HttpWebRequest request = WebRequest.Create(requestUrl) as HttpWebRequest;
+                byte[] dataBuffer = null;
 
                 request.Accept = "application/vnd.twitchtv.v2+json";
                 request.ContentType = "application/json";
@@ -76,7 +77,7 @@ namespace LobsterKnifeFight
                     case RequestType.Put:
                         request.Method = "PUT";
 
-                        byte[] dataBuffer = System.Text.Encoding.UTF8.GetBytes(body);
+                        dataBuffer = System.Text.Encoding.UTF8.GetBytes(body);
                         request.ContentLength = dataBuffer.Length;
 
                         using (System.IO.Stream dataStream = request.GetRequestStream())
@@ -88,7 +89,13 @@ namespace LobsterKnifeFight
                     case RequestType.Post:
                         request.Method = "POST";
 
-                        writeDataToRequest(ref request, body);
+                        dataBuffer = System.Text.Encoding.UTF8.GetBytes(body);
+                        request.ContentLength = dataBuffer.Length;
+
+                        using (System.IO.Stream dataStream = request.GetRequestStream())
+                        {
+                            dataStream.Write(dataBuffer, 0, dataBuffer.Length);
+                        }
 
                         break;
                     case RequestType.Delete:

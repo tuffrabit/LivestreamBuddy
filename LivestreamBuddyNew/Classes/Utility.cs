@@ -28,7 +28,7 @@ namespace LivestreamBuddyNew
 
         public static void GetAccessToken(User user, bool getNewAccessToken = false)
         {
-            GetAccessToken(user, new UserScope[] { UserScope.UserRead, UserScope.ChatLogin, UserScope.ChannelEditor }, getNewAccessToken);
+            GetAccessToken(user, new UserScope[] { UserScope.UserRead, UserScope.ChatLogin, UserScope.ChannelEditor, UserScope.ChannelCommercial }, getNewAccessToken);
         }
 
         public static void ClearUserData(User user)
