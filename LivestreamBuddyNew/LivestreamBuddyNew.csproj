@@ -87,9 +87,15 @@
     <Compile Include="Controls\Stream.xaml.cs">
       <DependentUpon>Stream.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\ViewStream.xaml.cs">
+      <DependentUpon>ViewStream.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Enums\IRCErrors.cs" />
     <Compile Include="SingleTextBoxWindow.xaml.cs">
       <DependentUpon>SingleTextBoxWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ViewStreamWindow.xaml.cs">
+      <DependentUpon>ViewStreamWindow.xaml</DependentUpon>
     </Compile>
     <Page Include="AuthWindow.xaml">
       <SubType>Designer</SubType>
@@ -115,6 +121,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Controls\ViewStream.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -131,6 +141,10 @@
       <SubType>Code</SubType>
     </Compile>
     <Page Include="SingleTextBoxWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="ViewStreamWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

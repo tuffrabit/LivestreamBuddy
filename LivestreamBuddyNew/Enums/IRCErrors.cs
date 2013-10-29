@@ -9,6 +9,11 @@ namespace LivestreamBuddyNew
     public enum IRCErrors
     {
         LoginUnsuccessful, 
-        ListenThreadError
+        ListenThreadError, 
+        JoinError, 
+        PartError, 
+        ChannelMessageError, 
+        NamesError, 
+        ModeError
     }
 }

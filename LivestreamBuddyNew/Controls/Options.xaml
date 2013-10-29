@@ -12,6 +12,7 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
@@ -19,6 +20,7 @@
                 <CheckBox Name="chkStreamOpenStyle" IsChecked="True" Grid.Row="0" Grid.Column="0" Margin="0 0 0 7">Open streams in new tab</CheckBox>
                 <CheckBox Name="chkStreamViewShow" IsChecked="True" Grid.Row="1" Grid.Column="0" Margin="0 0 0 7">Show stream feed when opening</CheckBox>
                 <CheckBox Name="chkStreamShowChatTimestamps" IsChecked="False" Grid.Row="2" Grid.Column="0" Margin="0 0 0 7">Show timestamps in chat</CheckBox>
+                <CheckBox Name="chkEnableDebugLogging" IsChecked="False" Grid.Row="3" Grid.Column="0" Margin="0 0 0 7">Enable debug logging</CheckBox>
             </Grid>
         </DockPanel>
     </Border>

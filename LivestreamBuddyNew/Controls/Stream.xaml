@@ -1,4 +1,4 @@
-﻿<UserControl xmlns:Controls="clr-namespace:System.Windows.Controls;assembly=System.Windows.Controls.Input.Toolkit"  xmlns:my="http://schemas.awesomium.com/winfx"  x:Class="LivestreamBuddyNew.Controls.Stream"
+﻿<UserControl xmlns:Controls1="clr-namespace:LivestreamBuddyNew.Controls"  xmlns:Controls="clr-namespace:System.Windows.Controls;assembly=System.Windows.Controls.Input.Toolkit"  xmlns:my="http://schemas.awesomium.com/winfx"  x:Class="LivestreamBuddyNew.Controls.Stream"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -10,10 +10,11 @@
                 <TabItem Header="Chat / View">
                 <DockPanel Name="pnlMainDock" LastChildFill="True" SizeChanged="pnlMainDock_SizeChanged">
                     <TextBox Name="txtMessage" DockPanel.Dock="Bottom" Margin="0 7 0 0" KeyDown="txtMessage_KeyDown" />
-                    <DockPanel Name="pnlWebViewStream" DockPanel.Dock="Top" MinHeight="245">
-                        <my:WebControl Name="webViewStream" Margin="0 0 0 7" />
-                    </DockPanel>
-                    <Button Name="btnShowHideViewStream" Margin="0 0 0 7" DockPanel.Dock="Top" Width="150" Click="btnShowHideViewStream_Click" />
+                    <DockPanel Name="pnlViewStream" DockPanel.Dock="Top" />
+                    <StackPanel Orientation="Horizontal" DockPanel.Dock="Top" Margin="0 0 0 7" HorizontalAlignment="Center">
+                        <Button Name="btnShowHideViewStream" Margin="0 0 7 0" Width="150" Click="btnShowHideViewStream_Click" />
+                        <Button Name="btnPopoutViewStream" Width="150" Click="btnPopoutViewStream_Click">Popout</Button>
+                    </StackPanel>
                     <DockPanel DockPanel.Dock="Right" Margin="7 0 0 0" LastChildFill="True">
                         <StackPanel Orientation="Horizontal" DockPanel.Dock="Top" Margin="0 0 0 7">
                             <TextBlock Margin="0 0 7 0">Viewers:</TextBlock>

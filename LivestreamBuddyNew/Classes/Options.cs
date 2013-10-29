@@ -13,6 +13,7 @@ namespace LivestreamBuddyNew
             OpenStreamsInNewTab = true;
             ShowStreamFeedWhenOpening = true;
             ShowTimestampsInChat = false;
+            EnableDebugLogging = false;
         }
 
         public bool OpenStreamsInNewTab { get; set; }
@@ -20,5 +21,7 @@ namespace LivestreamBuddyNew
         public bool ShowStreamFeedWhenOpening { get; set; }
 
         public bool ShowTimestampsInChat { get; set; }
+
+        public bool EnableDebugLogging { get; set; }
     }
 }

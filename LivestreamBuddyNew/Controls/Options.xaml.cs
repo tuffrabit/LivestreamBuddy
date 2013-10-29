@@ -28,6 +28,7 @@ namespace LivestreamBuddyNew.Controls
             chkStreamOpenStyle.IsChecked = this.UserOptions.OpenStreamsInNewTab;
             chkStreamViewShow.IsChecked = this.UserOptions.ShowStreamFeedWhenOpening;
             chkStreamShowChatTimestamps.IsChecked = this.UserOptions.ShowTimestampsInChat;
+            chkEnableDebugLogging.IsChecked = this.UserOptions.EnableDebugLogging;
         }
 
         # region Public Members
@@ -43,6 +44,7 @@ namespace LivestreamBuddyNew.Controls
             this.UserOptions.OpenStreamsInNewTab = chkStreamOpenStyle.IsChecked.Value;
             this.UserOptions.ShowStreamFeedWhenOpening = chkStreamViewShow.IsChecked.Value;
             this.UserOptions.ShowTimestampsInChat = chkStreamShowChatTimestamps.IsChecked.Value;
+            this.UserOptions.EnableDebugLogging = chkEnableDebugLogging.IsChecked.Value;
 
             DataFileManager.SetOptions(this.UserOptions);
             DoOnSaved();

@@ -38,11 +38,10 @@ namespace LivestreamBuddyNew.Controls
             urlRegex = new Regex(@"(?i)\b((?:[a-z][\w-]+:(?:/{1,3}|[a-z0-9%])|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'.,<>?«»“”‘’]))", RegexOptions.Compiled);
             excludeList = new List<string>();
 
-            webViewStream.ViewType = WebViewType.Window;
-            webViewStream.SizeChanged += webViewStream_SizeChanged;
-
             webChat.NativeViewInitialized += webChat_NativeViewInitialized;
             webChat.SizeChanged += webChat_SizeChanged;
+
+            viewStreamPreviousHeight = 0;
         }
 
         public Stream(User user,
@@ -68,17 +67,18 @@ namespace LivestreamBuddyNew.Controls
             viewModel.TitleAutoCompleteOptions = streamTitleAutoCompleteOptions;
             viewModel.GameAutoCompleteOptions = streamGameAutoCompleteOptions;
 
+            viewStream = new ViewStream(channelName, false, viewStreamMinimumHeight);
+            pnlViewStream.Children.Add(viewStream);
+
             if (showStreamFeed)
             {
-                webViewStream.NativeViewInitialized += webViewStream_NativeViewInitialized;
-                pnlWebViewStream.Visibility = System.Windows.Visibility.Visible;
+                pnlViewStream.Visibility = System.Windows.Visibility.Visible;
                 btnShowHideViewStream.Content = "Hide";
             }
             else
             {
-                pnlWebViewStream.Visibility = System.Windows.Visibility.Collapsed;
+                pnlViewStream.Visibility = System.Windows.Visibility.Collapsed;
                 btnShowHideViewStream.Content = "Show";
-                pnlWebViewStreamPreviousHeight = pnlWebViewStreamMinimumHeight;
             }
         }
 
@@ -86,13 +86,10 @@ namespace LivestreamBuddyNew.Controls
 
         public void Disconnect()
         {
+            viewStream.Shutdown();
+
             if (this.client != null)
             {
-                if (!webViewStream.IsDisposed)
-                {
-                    webViewStream.Dispose();
-                }
-
                 if (!webChat.IsDisposed)
                 {
                     webChat.Dispose();
@@ -125,6 +122,7 @@ namespace LivestreamBuddyNew.Controls
                 viewers.AddRange(newViewers);
             }
 
+            viewers.Sort();
             viewModel.Viewers = viewers;
             lblViewerCount.Text = viewers.Count.ToString();
         }
@@ -156,98 +154,89 @@ namespace LivestreamBuddyNew.Controls
 
         private void writeChatLine(string nickname, string message, string nickColor)
         {
-            List<EmoticonMatch> emoticonMatches = new List<EmoticonMatch>();
-
-            if (emoticons != null)
+            if (!webChat.IsDisposed)
             {
-                for (int i = 0; i < emoticons.Count; i++)
-                {
-                    Emoticon emoticon = emoticons[i];
+                List<EmoticonMatch> emoticonMatches = new List<EmoticonMatch>();
 
-                    foreach (Match match in emoticon.Regex.Matches(message))
+                if (emoticons != null)
+                {
+                    for (int i = 0; i < emoticons.Count; i++)
                     {
-                        emoticonMatches.Add(new EmoticonMatch(match, emoticon.Url));
+                        Emoticon emoticon = emoticons[i];
+
+                        foreach (Match match in emoticon.Regex.Matches(message))
+                        {
+                            emoticonMatches.Add(new EmoticonMatch(match, emoticon.Url));
+                        }
                     }
                 }
-            }
 
-            MatchCollection urls = urlRegex.Matches(message);
+                MatchCollection urls = urlRegex.Matches(message);
 
-            if (urls.Count > 0)
-            {
-                for (int i = 0; i < urls.Count; i++)
+                if (urls.Count > 0)
                 {
-                    Match match = urls[i];
+                    for (int i = 0; i < urls.Count; i++)
+                    {
+                        Match match = urls[i];
 
-                    string before = message.Substring(0, match.Index);
-                    string after = message.Substring(match.Index + match.Length);
+                        string before = message.Substring(0, match.Index);
+                        string after = message.Substring(match.Index + match.Length);
 
-                    message = string.Format("{0}<a href='javascript:void(0)' onclick='linkClick(&quot;{1}&quot;);'>{1}</a>{2}", before, match.Value, after);
+                        message = string.Format("{0}<a href='javascript:void(0)' onclick='linkClick(&quot;{1}&quot;);'>{1}</a>{2}", before, match.Value, after);
+                    }
                 }
-            }
 
-            if (emoticonMatches.Count > 0)
-            {
-                for (int i = 0; i < emoticonMatches.Count; i++)
+                if (emoticonMatches.Count > 0)
                 {
-                    EmoticonMatch match = emoticonMatches[i];
+                    for (int i = 0; i < emoticonMatches.Count; i++)
+                    {
+                        EmoticonMatch match = emoticonMatches[i];
 
-                    string before = message.Substring(0, match.Match.Index);
-                    string after = message.Substring(match.Match.Index + match.Match.Length);
+                        string before = message.Substring(0, match.Match.Index);
+                        string after = message.Substring(match.Match.Index + match.Match.Length);
 
-                    message = string.Format("{0}<img src='{1}' />{2}", before, match.Replacement, after);
+                        message = string.Format("{0}<img src='{1}' />{2}", before, match.Replacement, after);
+                    }
                 }
+
+                if (this.showTimestampsInChat)
+                {
+                    DateTime now = DateTime.Now;
+
+                    nickname = string.Format("[{0}]{1}", now.ToString("H:mm"), nickname);
+                }
+
+                message = message.Replace("\"", "&quot;").Replace("\"", "&#39;");
+                webChat.ExecuteJavascript("chatMessage(\"" + nickname + "\", \"" + message + "\", \"" + nickColor + "\");");
             }
-
-            if (this.showTimestampsInChat)
-            {
-                DateTime now = DateTime.Now;
-
-                nickname = string.Format("[{0}]{1}", now.ToString("H:mm"), nickname);
-            }
-
-            webChat.ExecuteJavascript("chatMessage(\"" + nickname + "\", \"" + message + "\", \"" + nickColor + "\");");
-        }
-
-        private void webViewStreamLoadHTML()
-        {
-            webChat.DocumentReady += webChat_DocumentReady;
-            webViewStream.LoadHTML("<html><head><script>function resizePlayer(width, height){var player=document.getElementById('live_embed_player_flash');if (width==-1){width=window.innerWidth - 16;}if (height==-1){height=window.innerHeight - 16;}player.style.width=width + 'px';player.style.maxWidth=width + 'px';player.style.height=height + 'px';player.style.maxHeight=height + 'px';}</script></head><body><object type='application/x-shockwave-flash' height='271' width='456' id='live_embed_player_flash' data='http://www.twitch.tv/widgets/live_embed_player.swf?channel=" + this.channelName + "' bgcolor='#000000'><param name='allowFullScreen' value='true'/><param name='allowScriptAccess' value='always'/><param name='allowNetworking' value='all'/><param name='movie' value='http://www.twitch.tv/widgets/live_embed_player.swf'/><param name='flashvars' value='hostname=www.twitch.tv&channel=" + this.channelName + "&auto_play=true&start_volume=25'/></object></body></html>");
         }
 
         private void showHideStreamFeed(bool show)
         {
             if (!show)
             {
-                pnlWebViewStreamPreviousHeight = pnlWebViewStream.ActualHeight;
-                pnlWebViewStream.Visibility = System.Windows.Visibility.Collapsed;
-                webViewStream.LoadHTML("<html><head></head><body></body></html>");
+                viewStreamPreviousHeight = pnlViewStream.ActualHeight;
+                pnlViewStream.Visibility = System.Windows.Visibility.Collapsed;
+                viewStream.Hide();
                 btnShowHideViewStream.Content = "Show";
             }
             else
             {
-                pnlWebViewStream.Visibility = System.Windows.Visibility.Visible;
-                webViewStreamLoadHTML();
+                pnlViewStream.Visibility = System.Windows.Visibility.Visible;
+                viewStream.Show();
 
-                if (pnlWebViewStreamPreviousHeight == 0)
+                if (viewStreamPreviousHeight == 0)
                 {
-                    pnlWebViewStreamPreviousHeight = pnlMainDock.ActualHeight * .469;
+                    viewStreamPreviousHeight = pnlMainDock.ActualHeight * .469;
                 }
-                else if (pnlWebViewStreamPreviousHeight < pnlWebViewStreamMinimumHeight)
+                else if (viewStreamPreviousHeight < viewStreamMinimumHeight)
                 {
-                    pnlWebViewStreamPreviousHeight = pnlWebViewStreamMinimumHeight;
+                    viewStreamPreviousHeight = viewStreamMinimumHeight;
                 }
 
-                setWebViewStreamHeight(pnlWebViewStreamPreviousHeight);
+                pnlViewStream.Height = viewStreamPreviousHeight;
                 btnShowHideViewStream.Content = "Hide";
             }
-        }
-
-        private void setWebViewStreamHeight(double height)
-        {
-            webViewStream.DocumentReady += webViewStream_DocumentReady;
-            pnlWebViewStream.Height = height;
-            webViewStream.Height = height;
         }
 
         # endregion
@@ -268,36 +257,13 @@ namespace LivestreamBuddyNew.Controls
         private Regex urlRegex;
         private List<Emoticon> emoticons;
         private List<string> excludeList;
-        private const double pnlWebViewStreamMinimumHeight = 245;
-        private double pnlWebViewStreamPreviousHeight;
+        private const double viewStreamMinimumHeight = 245;
+        private double viewStreamPreviousHeight;
+        private ViewStream viewStream;
 
         # endregion
 
         # region Event Handlers
-
-        void webViewStream_NativeViewInitialized(object sender, WebViewEventArgs e)
-        {
-            webViewStreamLoadHTML();
-        }
-
-        void webViewStream_SizeChanged(object sender, SizeChangedEventArgs e)
-        {
-            if (webViewStream.IsDocumentReady)
-            {
-                webViewStream.ExecuteJavascript("resizePlayer(" + (webViewStream.ActualWidth - 16).ToString() + ", " + (webViewStream.ActualHeight - 16).ToString() + ")");
-            }
-        }
-
-        void webViewStream_DocumentReady(object sender, UrlEventArgs e)
-        {
-            webViewStream.DocumentReady -= webViewStream_DocumentReady;
-
-            try
-            {
-                webViewStream.ExecuteJavascript("resizePlayer(-1, -1)");
-            }
-            catch { }
-        }
 
         void webChat_SizeChanged(object sender, SizeChangedEventArgs e)
         {
@@ -309,6 +275,8 @@ namespace LivestreamBuddyNew.Controls
 
         void webChat_NativeViewInitialized(object sender, Awesomium.Core.WebViewEventArgs e)
         {
+            webChat.DocumentReady += webChat_DocumentReady;
+
             if (webChat.IsLive)
             {
                 webChat.LoadHTML("<html><head><style>.pnlMessages{position: absolute;left: 1px;top: 1px;overflow-y: auto;padding: 3px 3px 3px 3px;}.pnlMessages div{font: .9em calibri;margin: 4px 4px 4px 4px;}</style><script>function resizeMessagesPanel(width, height){var pnlMessages=document.getElementById('pnlMessages');if (width==-1){width=window.innerWidth - 10;}if (height==-1){height=window.innerHeight - 10;}pnlMessages.style.width=width + 'px';pnlMessages.style.maxWidth=width + 'px';pnlMessages.style.height=height + 'px';pnlMessages.style.maxHeight=height + 'px';}function clearMessages(){var pnlMessages=document.getElementById('pnlMessages');pnlMessages.innerHTML='';}function scrollToBottom(){var pnlMessages=document.getElementById('pnlMessages');pnlMessages.scrollTop=pnlMessages.scrollHeight + 10;}function infoMessage(message){var pnlMessages=document.getElementById('pnlMessages');var newLine=document.createElement('div');newLine.setAttribute('style', 'font-weight:bold;');newLine.innerHTML=message;pnlMessages.appendChild(newLine);scrollToBottom();}function errorMessage(message){var pnlMessages=document.getElementById('pnlMessages');var newLine=document.createElement('div');newLine.setAttribute('style', 'color:red;font-weight:bold;');newLine.innerHTML='Error: ' + message;pnlMessages.appendChild(newLine);scrollToBottom();}function chatMessage(username, message, color){var pnlMessages=document.getElementById('pnlMessages');var newChatLine=document.createElement('div');var nameField=document.createElement('span');var messageField=document.createElement('span');nameField.setAttribute('style', 'color:' + color + ';font-weight:bold;');nameField.innerHTML=username + ': ';messageField.innerHTML=message;newChatLine.appendChild(nameField);newChatLine.appendChild(messageField);pnlMessages.appendChild(newChatLine);scrollToBottom();}function linkClick(url){jsobject.HostRaiseLinkClick(url);}</script></head><body><div id='pnlMessages' class='pnlMessages'></div></body></html>");
@@ -328,12 +296,21 @@ namespace LivestreamBuddyNew.Controls
             client = new IrcClientHelper();
             client.OnError += client_OnError;
             client.OnChannelJoin += client_OnChannelJoin;
+            client.OnDisconnected += client_OnDisconnected;
             client.OnMessage += client_OnMessage;
             client.OnUserListCompleted += client_OnUserListCompleted;
             client.OnUserJoin += client_OnUserJoin;
             client.OnUserPart += client_OnUserPart;
 
             client.Connect(this.channelName, this.user.Name, this.accessToken);
+        }
+
+        void client_OnDisconnected(object sender, EventArgs e)
+        {
+            if (!webChat.IsDisposed)
+            {
+                webChat.ExecuteJavascript("errorMessage('Disconnected from chat. Close the stream chat and try re-opening it.');");
+            }
         }
 
         void client_OnUserPart(object sender, IRCUserEventArgs e)
@@ -532,20 +509,37 @@ namespace LivestreamBuddyNew.Controls
             {
                 double newHeight = e.NewSize.Height * .469;
 
-                if (newHeight >= pnlWebViewStreamMinimumHeight)
+                if (newHeight >= viewStreamMinimumHeight)
                 {
-                    setWebViewStreamHeight(newHeight);
+                    pnlViewStream.Height = newHeight;
                 }
                 else
                 {
-                    setWebViewStreamHeight(pnlWebViewStreamMinimumHeight);
+                    pnlViewStream.Height = viewStreamMinimumHeight;
                 }
             }
         }
 
         private void btnShowHideViewStream_Click(object sender, RoutedEventArgs e)
         {
-            showHideStreamFeed(!pnlWebViewStream.IsVisible);
+            showHideStreamFeed(!pnlViewStream.IsVisible);
+        }
+
+        private void btnPopoutViewStream_Click(object sender, RoutedEventArgs e)
+        {
+            ViewStreamWindow window = new ViewStreamWindow(this.channelName, viewStreamMinimumHeight);
+
+            window.Closed += delegate(object windowClosedSender, EventArgs windowClosedArgs)
+            {
+                showHideStreamFeed(true);
+                btnShowHideViewStream.IsEnabled = true;
+                btnPopoutViewStream.IsEnabled = true;
+            };
+
+            btnShowHideViewStream.IsEnabled = false;
+            btnPopoutViewStream.IsEnabled = false;
+            showHideStreamFeed(false);
+            window.Show();
         }
 
         private void RunCommercial(object sender, RoutedEventArgs e)

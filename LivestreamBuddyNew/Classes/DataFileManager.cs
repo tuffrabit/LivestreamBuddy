@@ -319,6 +319,13 @@ namespace LivestreamBuddyNew
                                     }
 
                                     break;
+                                case "enabledebuglogging":
+                                    if (bool.TryParse(values[1], out temp))
+                                    {
+                                        options.EnableDebugLogging = temp;
+                                    }
+
+                                    break;
                             }
                         }
                     }
@@ -337,6 +344,7 @@ namespace LivestreamBuddyNew
                     writer.WriteLine("OpenStreamsInNewTab " + (options.OpenStreamsInNewTab ? "true" : "false"));
                     writer.WriteLine("ShowStreamFeedWhenOpening " + (options.ShowStreamFeedWhenOpening ? "true" : "false"));
                     writer.WriteLine("ShowTimestampsInChat " + (options.ShowTimestampsInChat ? "true" : "false"));
+                    writer.WriteLine("EnableDebugLogging " + (options.EnableDebugLogging ? "true" : "false"));
                 }
             }
         }

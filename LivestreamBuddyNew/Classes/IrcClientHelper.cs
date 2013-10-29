@@ -18,6 +18,7 @@ namespace LivestreamBuddyNew
         private string accessToken;
         private Thread workerThread;
         private volatile bool shouldStop;
+        private Options options;
 
         # endregion
 
@@ -27,6 +28,7 @@ namespace LivestreamBuddyNew
             client.Encoding = Encoding.UTF8;
 
             client.OnConnected += client_OnConnected;
+            client.OnDisconnected += client_OnDisconnected;
             client.OnChannelMessage += client_OnChannelMessage;
             client.OnJoin += client_OnJoin;
             client.OnPart += client_OnPart;
@@ -36,6 +38,7 @@ namespace LivestreamBuddyNew
 
             this.workerThread = null;
             this.shouldStop = false;
+            this.options = DataFileManager.GetOptions();
         }
 
         # region Public Methods
@@ -156,49 +159,89 @@ namespace LivestreamBuddyNew
 
         void client_OnJoin(object sender, JoinEventArgs e)
         {
-            if (this.username == e.Who)
+            try
             {
-                DoOnChannelJoin();
+                if (this.username == e.Who)
+                {
+                    DoOnChannelJoin();
+                }
+                else
+                {
+                    DoOnUserJoin(e.Who);
+                }
             }
-            else
+            catch (Exception ex)
             {
-                DoOnUserJoin(e.Who);
+                Utility.Log(this.GetType(), "client_OnJoin()", ex.Message, ex.StackTrace);
+                DoOnError(IRCErrors.JoinError);
             }
         }
 
         void client_OnPart(object sender, PartEventArgs e)
         {
-            DoOnUserPart(e.Who);
+            try
+            {
+                DoOnUserPart(e.Who);
+            }
+            catch (Exception ex)
+            {
+                Utility.Log(this.GetType(), "client_OnPart()", ex.Message, ex.StackTrace);
+                DoOnError(IRCErrors.PartError);
+            }
         }
 
         void client_OnChannelMessage(object sender, IrcEventArgs e)
         {
-            DoOnMessage(e.Data.Nick, e.Data.Message);
+            try
+            {
+                DoOnMessage(e.Data.Nick, e.Data.Message);
+            }
+            catch (Exception ex)
+            {
+                Utility.Log(this.GetType(), "client_OnChannelMessage()", ex.Message, ex.StackTrace);
+                DoOnError(IRCErrors.ChannelMessageError);
+            }
         }
 
         void client_OnNames(object sender, NamesEventArgs e)
         {
-            DoOnUserListCompleted(e.UserList);
+            try
+            {
+                DoOnUserListCompleted(e.UserList);
+            }
+            catch (Exception ex)
+            {
+                Utility.Log(this.GetType(), "client_OnNames()", ex.Message, ex.StackTrace);
+                DoOnError(IRCErrors.NamesError);
+            }
         }
 
         void client_OnModeChange(object sender, IrcEventArgs e)
         {
-            switch (e.Data.Type)
+            try
             {
-                case ReceiveType.ChannelModeChange:
-                    bool isModerator = false;
+                switch (e.Data.Type)
+                {
+                    case ReceiveType.ChannelModeChange:
+                        bool isModerator = false;
 
-                    if (e.Data.RawMessageArray.Length >= 5)
-                    {
-                        if (e.Data.RawMessageArray[3] == "+o")
+                        if (e.Data.RawMessageArray.Length >= 5)
                         {
-                            isModerator = true;
+                            if (e.Data.RawMessageArray[3] == "+o")
+                            {
+                                isModerator = true;
+                            }
+
+                            DoOnUserMode(e.Data.RawMessageArray[4], isModerator);
                         }
 
-                        DoOnUserMode(e.Data.RawMessageArray[4], isModerator);
-                    }
-
-                    break;
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                Utility.Log(this.GetType(), "client_OnModeChange()", ex.Message, ex.StackTrace);
+                DoOnError(IRCErrors.ModeError);
             }
         }
 
@@ -214,7 +257,22 @@ namespace LivestreamBuddyNew
 
         void client_OnConnected(object sender, EventArgs e)
         {
+            if (this.options.EnableDebugLogging)
+            {
+                Utility.Log(this.GetType(), "client_OnConnected()", "Connected to #" + this.channelName, string.Empty);
+            }
+
             loginJoinAndStartAllTheThings();
+        }
+
+        void client_OnDisconnected(object sender, EventArgs e)
+        {
+            if (this.options.EnableDebugLogging)
+            {
+                Utility.Log(this.GetType(), "client_OnDisconnected()", "Disconnected from #" + this.channelName, string.Empty);
+            }
+
+            DoDisconnected();
         }
 
         # endregion
@@ -228,6 +286,16 @@ namespace LivestreamBuddyNew
             if (OnChannelJoin != null)
             {
                 OnChannelJoin(this, null);
+            }
+        }
+
+        public delegate void DisconnectedHandler(object sender, EventArgs e);
+        public event DisconnectedHandler OnDisconnected;
+        private void DoDisconnected()
+        {
+            if (OnDisconnected != null)
+            {
+                OnDisconnected(this, null);
             }
         }
 
