@@ -55,23 +55,18 @@ namespace LivestreamBuddyNew
 
             emoticons = null;
 
-            bool allowEmoticons = true;
             bool refreshEmoticons = false;
             string[] commandLineArgs = Environment.GetCommandLineArgs();
 
             foreach (string arg in commandLineArgs)
             {
-                if (string.Compare(arg, "-noemote", StringComparison.OrdinalIgnoreCase) == 0)
-                {
-                    allowEmoticons = false;
-                }
-                else if (string.Compare(arg, "-refreshemoticons", StringComparison.OrdinalIgnoreCase) == 0)
+                if (string.Compare(arg, "-refreshemoticons", StringComparison.OrdinalIgnoreCase) == 0)
                 {
                     refreshEmoticons = true;
                 }
             }
 
-            if (allowEmoticons)
+            if (userOptions.ShowEmoticonsInChat)
             {
                 try
                 {
@@ -125,6 +120,11 @@ namespace LivestreamBuddyNew
                 {
                     if (!string.IsNullOrEmpty(user.AccessToken) && !string.IsNullOrEmpty(user.Name))
                     {
+                        if (this.userOptions.ShowEmoticonsInChat && this.emoticons == null)
+                        {
+                            this.emoticons = DataFileManager.GetEmoticons();
+                        }
+
                         visibleStreams.Add(e.ChannelName);
 
                         if (this.userOptions.OpenStreamsInNewTab)
@@ -132,8 +132,6 @@ namespace LivestreamBuddyNew
                             Controls.Stream stream = new Controls.Stream(this.user, 
                                 e.ChannelName, 
                                 this.user.AccessToken,
-                                this.userOptions.ShowStreamFeedWhenOpening, 
-                                this.userOptions.ShowTimestampsInChat, 
                                 this.potentialNicknameColors, 
                                 this.streamTitleAutoCompleteOptions, 
                                 this.streamGameAutoCompleteOptions, 
@@ -159,8 +157,6 @@ namespace LivestreamBuddyNew
                             Controls.Stream stream = new Controls.Stream(this.user, 
                                 e.ChannelName, 
                                 this.user.AccessToken,
-                                this.userOptions.ShowStreamFeedWhenOpening,
-                                this.userOptions.ShowTimestampsInChat, 
                                 this.potentialNicknameColors, 
                                 this.streamTitleAutoCompleteOptions,
                                 this.streamGameAutoCompleteOptions,

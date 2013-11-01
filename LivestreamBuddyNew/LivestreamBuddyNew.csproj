@@ -40,12 +40,16 @@
   <PropertyGroup>
     <ApplicationIcon>livestream-ICON.ico</ApplicationIcon>
   </PropertyGroup>
+  <PropertyGroup>
+    <RunPostBuildEvent>Always</RunPostBuildEvent>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Awesomium.Core, Version=1.7.2.2, Culture=neutral, PublicKeyToken=e1a0d7c8071a5214, processorArchitecture=x86" />
     <Reference Include="awesomium.windows.controls, Version=1.7.2.2, Culture=neutral, PublicKeyToken=7a34e179b8b61c39, processorArchitecture=x86" />
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Web" />
     <Reference Include="system.windows.controls.input.toolkit, Version=3.5.40128.1, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
@@ -191,6 +195,10 @@
       <Project>{1530732e-973a-4e53-bfb4-e373fb127c44}</Project>
       <Name>LobsterKnifeFight</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Newtonsoft.Json\Newtonsoft.Json.Net40.csproj">
+      <Project>{a9ae40ff-1a21-414a-9fe7-3be13644cc6d}</Project>
+      <Name>Newtonsoft.Json.Net40</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\offline.png" />
@@ -218,7 +226,9 @@
 xcopy "$(SolutionDir)LivestreamBuddyNew\FlatFiles\Emoticons.txt" "$(TargetDir)" /Y
 xcopy "$(SolutionDir)LivestreamBuddyNew\Plugins\NPSWF32_11_8_800_94.dll" "$(TargetDir)" /Y
 xcopy "$(SolutionDir)LivestreamBuddyNew\FlatFiles\help.html" "$(TargetDir)" /Y
-"C:\Program Files\7-Zip\7z.exe" a -tzip "$(SolutionDir)LivestreamBuddyNew$(ConfigurationName).zip" "$(TargetDir)*" -x!*.pdb -x!*.manifest -x!*.config -x!*.vshost.exe -x!*.xml -x!debug.log -x!FavoriteChannels.txt -x!Identities.txt -x!Options.txt</PostBuildEvent>
+xcopy "$(SolutionDir)LivestreamBuddyNew\FlatFiles\chat.html" "$(TargetDir)" /Y
+del "$(SolutionDir)LivestreamBuddyNew$(ConfigurationName).zip" /Q
+"C:\Program Files\7-Zip\7z.exe" a -tzip "$(SolutionDir)LivestreamBuddyNew$(ConfigurationName).zip" "$(TargetDir)*" -x!*.pdb -x!*.manifest -x!*.config -x!*.vshost.exe -x!*.xml -x!debug.log -x!FavoriteChannels.txt -x!Identities.txt -x!Options.txt -x!log*.txt</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

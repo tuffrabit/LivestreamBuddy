@@ -13,14 +13,22 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
                 <CheckBox Name="chkStreamOpenStyle" IsChecked="True" Grid.Row="0" Grid.Column="0" Margin="0 0 0 7">Open streams in new tab</CheckBox>
                 <CheckBox Name="chkStreamViewShow" IsChecked="True" Grid.Row="1" Grid.Column="0" Margin="0 0 0 7">Show stream feed when opening</CheckBox>
                 <CheckBox Name="chkStreamShowChatTimestamps" IsChecked="False" Grid.Row="2" Grid.Column="0" Margin="0 0 0 7">Show timestamps in chat</CheckBox>
                 <CheckBox Name="chkEnableDebugLogging" IsChecked="False" Grid.Row="3" Grid.Column="0" Margin="0 0 0 7">Enable debug logging</CheckBox>
+                <StackPanel Grid.Row="4" Grid.Column="0" Orientation="Horizontal">
+                    <Label Margin="0 0 7 0">Chat text size:</Label>
+                    <TextBox Name="txtChatTextSize" Width="50"></TextBox>
+                </StackPanel>
+                <CheckBox Name="chkShowEmoticonsInChat" IsChecked="False" Grid.Row="5" Grid.Column="0" Margin="0 0 0 7">Show emoticons in chat</CheckBox>
             </Grid>
         </DockPanel>
     </Border>

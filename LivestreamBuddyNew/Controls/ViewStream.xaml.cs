@@ -28,12 +28,13 @@ namespace LivestreamBuddyNew.Controls
             webViewStream.NativeViewInitialized += webViewStream_NativeViewInitialized;
         }
 
-        public ViewStream(string channelName, bool isWindow, double minimumHeight)
+        public ViewStream(string channelName, bool isWindow, double minimumHeight, bool show = true)
             : this()
         {
             this.channelName = channelName;
             this.minimumHeight = minimumHeight;
             this.isWindow = isWindow;
+            this.showOnLoad = show;
 
             if (isWindow)
             {
@@ -49,6 +50,7 @@ namespace LivestreamBuddyNew.Controls
         private double minimumHeight;
         private double previousHeight;
         private bool isWindow;
+        private bool showOnLoad;
 
         # endregion
 
@@ -65,7 +67,15 @@ namespace LivestreamBuddyNew.Controls
                 allowFullscreen = "true";
             }
 
-            webViewStream.LoadHTML("<html><head><script>function resizePlayer(width, height){var player=document.getElementById('live_embed_player_flash');if (width==-1){width=window.innerWidth - 16;}if (height==-1){height=window.innerHeight - 16;}player.style.width=width + 'px';player.style.maxWidth=width + 'px';player.style.height=height + 'px';player.style.maxHeight=height + 'px';}</script></head><body><object type='application/x-shockwave-flash' height='271' width='456' id='live_embed_player_flash' data='http://www.twitch.tv/widgets/live_embed_player.swf?channel=" + this.channelName + "' bgcolor='#000000'><param name='allowFullScreen' value='" + allowFullscreen + "'/><param name='allowScriptAccess' value='always'/><param name='allowNetworking' value='all'/><param name='movie' value='http://www.twitch.tv/widgets/live_embed_player.swf'/><param name='flashvars' value='hostname=www.twitch.tv&channel=" + this.channelName + "&auto_play=true&start_volume=25'/></object></body></html>");
+            if (this.showOnLoad)
+            {
+                webViewStream.LoadHTML("<html><head><script>function resizePlayer(width, height){var player=document.getElementById('live_embed_player_flash');if (width==-1){width=window.innerWidth - 16;}if (height==-1){height=window.innerHeight - 16;}player.style.width=width + 'px';player.style.maxWidth=width + 'px';player.style.height=height + 'px';player.style.maxHeight=height + 'px';}</script></head><body><object type='application/x-shockwave-flash' height='271' width='456' id='live_embed_player_flash' data='http://www.twitch.tv/widgets/live_embed_player.swf?channel=" + this.channelName + "' bgcolor='#000000'><param name='allowFullScreen' value='" + allowFullscreen + "'/><param name='allowScriptAccess' value='always'/><param name='allowNetworking' value='all'/><param name='movie' value='http://www.twitch.tv/widgets/live_embed_player.swf'/><param name='flashvars' value='hostname=www.twitch.tv&channel=" + this.channelName + "&auto_play=true&start_volume=25'/></object></body></html>");
+            }
+            else
+            {
+                Hide();
+                this.showOnLoad = true;
+            }
         }
 
         private void setWebViewStreamHeight(double height)
@@ -101,6 +111,13 @@ namespace LivestreamBuddyNew.Controls
 
         void webViewStream_NativeViewInitialized(object sender, WebViewEventArgs e)
         {
+            INavigationInterceptor navigationInterceptor = webViewStream.GetService(typeof(INavigationInterceptor)) as INavigationInterceptor;
+
+            if (navigationInterceptor != null)
+            {
+                navigationInterceptor.AddRule("*", NavigationRule.Deny);
+            }
+
             loadHTML();
         }
 

@@ -25,14 +25,8 @@ namespace LobsterKnifeFight
 {
     public class Emoticon
     {
-        public Regex Regex { get; set; }
+        public string Pattern { get; set; }
 
         public string Url { get; set; }
-
-        public int Height { get; set; }
-
-        public int Width { get; set; }
-
-        public int Set { get; set; }
     }
 }

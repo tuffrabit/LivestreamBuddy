@@ -51,7 +51,7 @@ namespace LobsterKnifeFight
                     {
                         emoticons.Add(new Emoticon
                         {
-                            Regex = new System.Text.RegularExpressions.Regex((string)child["regex"], System.Text.RegularExpressions.RegexOptions.Compiled),
+                            Pattern = (string)child["regex"],
                             //Height = (Int32)child["images"][0]["height"],
                             //Width = (Int32)child["images"][0]["width"],
                             Url = (string)child["images"][0]["url"]

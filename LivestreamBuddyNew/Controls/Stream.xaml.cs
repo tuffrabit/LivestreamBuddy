@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Web;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -17,6 +18,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Awesomium.Core;
 using LobsterKnifeFight;
+using Newtonsoft.Json;
 
 namespace LivestreamBuddyNew.Controls
 {
@@ -32,6 +34,8 @@ namespace LivestreamBuddyNew.Controls
             viewModel = new StreamViewModel();
             DataContext = viewModel;
             Dispatcher.ShutdownStarted += Dispatcher_ShutdownStarted;
+            this.options = DataFileManager.GetOptions();
+            viewStreamWindow = null;
 
             nicknameColors = new Dictionary<string, string>();
             lastColorUsed = -1;
@@ -47,8 +51,6 @@ namespace LivestreamBuddyNew.Controls
         public Stream(User user,
             string channelName,
             string accessToken,
-            bool showStreamFeed,
-            bool showTimestampsInChat,
             string[] potentialNicknameColors,
             List<string> streamTitleAutoCompleteOptions,
             List<string> streamGameAutoCompleteOptions,
@@ -58,7 +60,6 @@ namespace LivestreamBuddyNew.Controls
             this.user = user;
             this.channelName = channelName;
             this.accessToken = accessToken;
-            this.showTimestampsInChat = showTimestampsInChat;
             this.potentialNicknameColors = potentialNicknameColors;
             this.streamTitleAutoCompleteOptions = streamTitleAutoCompleteOptions;
             this.streamGameAutoCompleteOptions = streamGameAutoCompleteOptions;
@@ -67,19 +68,21 @@ namespace LivestreamBuddyNew.Controls
             viewModel.TitleAutoCompleteOptions = streamTitleAutoCompleteOptions;
             viewModel.GameAutoCompleteOptions = streamGameAutoCompleteOptions;
 
-            viewStream = new ViewStream(channelName, false, viewStreamMinimumHeight);
-            pnlViewStream.Children.Add(viewStream);
-
-            if (showStreamFeed)
+            if (this.options.ShowStreamFeedWhenOpening)
             {
                 pnlViewStream.Visibility = System.Windows.Visibility.Visible;
                 btnShowHideViewStream.Content = "Hide";
+                viewStream = new ViewStream(channelName, false, viewStreamMinimumHeight);
             }
             else
             {
                 pnlViewStream.Visibility = System.Windows.Visibility.Collapsed;
                 btnShowHideViewStream.Content = "Show";
+                viewStream = new ViewStream(channelName, false, viewStreamMinimumHeight, false);
+                viewStreamPreviousHeight = viewStreamMinimumHeight;
             }
+
+            pnlViewStream.Children.Add(viewStream);
         }
 
         # region Public Methods
@@ -87,6 +90,11 @@ namespace LivestreamBuddyNew.Controls
         public void Disconnect()
         {
             viewStream.Shutdown();
+
+            if (viewStreamWindow != null)
+            {
+                viewStreamWindow.Close();
+            }
 
             if (this.client != null)
             {
@@ -156,58 +164,15 @@ namespace LivestreamBuddyNew.Controls
         {
             if (!webChat.IsDisposed)
             {
-                List<EmoticonMatch> emoticonMatches = new List<EmoticonMatch>();
+                string timestamp = string.Empty;
 
-                if (emoticons != null)
-                {
-                    for (int i = 0; i < emoticons.Count; i++)
-                    {
-                        Emoticon emoticon = emoticons[i];
-
-                        foreach (Match match in emoticon.Regex.Matches(message))
-                        {
-                            emoticonMatches.Add(new EmoticonMatch(match, emoticon.Url));
-                        }
-                    }
-                }
-
-                MatchCollection urls = urlRegex.Matches(message);
-
-                if (urls.Count > 0)
-                {
-                    for (int i = 0; i < urls.Count; i++)
-                    {
-                        Match match = urls[i];
-
-                        string before = message.Substring(0, match.Index);
-                        string after = message.Substring(match.Index + match.Length);
-
-                        message = string.Format("{0}<a href='javascript:void(0)' onclick='linkClick(&quot;{1}&quot;);'>{1}</a>{2}", before, match.Value, after);
-                    }
-                }
-
-                if (emoticonMatches.Count > 0)
-                {
-                    for (int i = 0; i < emoticonMatches.Count; i++)
-                    {
-                        EmoticonMatch match = emoticonMatches[i];
-
-                        string before = message.Substring(0, match.Match.Index);
-                        string after = message.Substring(match.Match.Index + match.Match.Length);
-
-                        message = string.Format("{0}<img src='{1}' />{2}", before, match.Replacement, after);
-                    }
-                }
-
-                if (this.showTimestampsInChat)
+                if (this.options.ShowTimestampsInChat)
                 {
                     DateTime now = DateTime.Now;
-
-                    nickname = string.Format("[{0}]{1}", now.ToString("H:mm"), nickname);
+                    timestamp = string.Format("[{0}]", now.ToString("H:mm"));
                 }
 
-                message = message.Replace("\"", "&quot;").Replace("\"", "&#39;");
-                webChat.ExecuteJavascript("chatMessage(\"" + nickname + "\", \"" + message + "\", \"" + nickColor + "\");");
+                webChat.ExecuteJavascript("chatMessageTwo(\"" + timestamp + "\", \"" + nickname + "\", \"" + HttpUtility.JavaScriptStringEncode(message) + "\", \"" + nickColor + "\");");
             }
         }
 
@@ -244,9 +209,9 @@ namespace LivestreamBuddyNew.Controls
         # region Private Members
 
         private User user;
+        private LivestreamBuddyNew.Options options;
         private string channelName;
         private string accessToken;
-        private bool showTimestampsInChat;
         private IrcClientHelper client;
         private StreamViewModel viewModel;
         private string[] potentialNicknameColors;
@@ -260,6 +225,7 @@ namespace LivestreamBuddyNew.Controls
         private const double viewStreamMinimumHeight = 245;
         private double viewStreamPreviousHeight;
         private ViewStream viewStream;
+        ViewStreamWindow viewStreamWindow;
 
         # endregion
 
@@ -279,7 +245,8 @@ namespace LivestreamBuddyNew.Controls
 
             if (webChat.IsLive)
             {
-                webChat.LoadHTML("<html><head><style>.pnlMessages{position: absolute;left: 1px;top: 1px;overflow-y: auto;padding: 3px 3px 3px 3px;}.pnlMessages div{font: .9em calibri;margin: 4px 4px 4px 4px;}</style><script>function resizeMessagesPanel(width, height){var pnlMessages=document.getElementById('pnlMessages');if (width==-1){width=window.innerWidth - 10;}if (height==-1){height=window.innerHeight - 10;}pnlMessages.style.width=width + 'px';pnlMessages.style.maxWidth=width + 'px';pnlMessages.style.height=height + 'px';pnlMessages.style.maxHeight=height + 'px';}function clearMessages(){var pnlMessages=document.getElementById('pnlMessages');pnlMessages.innerHTML='';}function scrollToBottom(){var pnlMessages=document.getElementById('pnlMessages');pnlMessages.scrollTop=pnlMessages.scrollHeight + 10;}function infoMessage(message){var pnlMessages=document.getElementById('pnlMessages');var newLine=document.createElement('div');newLine.setAttribute('style', 'font-weight:bold;');newLine.innerHTML=message;pnlMessages.appendChild(newLine);scrollToBottom();}function errorMessage(message){var pnlMessages=document.getElementById('pnlMessages');var newLine=document.createElement('div');newLine.setAttribute('style', 'color:red;font-weight:bold;');newLine.innerHTML='Error: ' + message;pnlMessages.appendChild(newLine);scrollToBottom();}function chatMessage(username, message, color){var pnlMessages=document.getElementById('pnlMessages');var newChatLine=document.createElement('div');var nameField=document.createElement('span');var messageField=document.createElement('span');nameField.setAttribute('style', 'color:' + color + ';font-weight:bold;');nameField.innerHTML=username + ': ';messageField.innerHTML=message;newChatLine.appendChild(nameField);newChatLine.appendChild(messageField);pnlMessages.appendChild(newChatLine);scrollToBottom();}function linkClick(url){jsobject.HostRaiseLinkClick(url);}</script></head><body><div id='pnlMessages' class='pnlMessages'></div></body></html>");
+                string currentPath = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+                webChat.Source = new Uri("file://" + currentPath + "\\chat.html");
             }
         }
 
@@ -290,7 +257,17 @@ namespace LivestreamBuddyNew.Controls
             JSObject jsobject = webChat.CreateGlobalJavascriptObject("jsobject");
             jsobject.Bind("HostRaiseLinkClick", false, webChat_OnHostRaiseLinkClick);
 
+            if (emoticons != null && options.ShowEmoticonsInChat)
+            {
+                webChat.ExecuteJavascript("var emoticons = " + JsonConvert.SerializeObject(emoticons) + ";");
+            }
+            else
+            {
+                webChat.ExecuteJavascript("var emoticons = [];");
+            }
+
             webChat.ExecuteJavascript("resizeMessagesPanel(-1, -1)");
+            webChat.ExecuteJavascript("document.getElementById('pnlMessages').style.fontSize=" + options.ChatTextSize.ToString() + ";");
             webChat.ExecuteJavascript("infoMessage('Joining channel...');");
 
             client = new IrcClientHelper();
@@ -407,7 +384,7 @@ namespace LivestreamBuddyNew.Controls
 
         private void txtMessage_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.Enter)
+            if (client != null && e.Key == Key.Enter)
             {
                 client.SendMessage(txtMessage.Text);
                 writeChatLine(this.user.Name, txtMessage.Text, "#000000");
@@ -429,7 +406,10 @@ namespace LivestreamBuddyNew.Controls
 
         void Dispatcher_ShutdownStarted(object sender, EventArgs e)
         {
-            client.Disconnect();
+            if (client != null)
+            {
+                client.Disconnect();
+            }
         }
 
         private void UpdateStreamClick(object sender, RoutedEventArgs e)
@@ -527,9 +507,9 @@ namespace LivestreamBuddyNew.Controls
 
         private void btnPopoutViewStream_Click(object sender, RoutedEventArgs e)
         {
-            ViewStreamWindow window = new ViewStreamWindow(this.channelName, viewStreamMinimumHeight);
+            viewStreamWindow = new ViewStreamWindow(this.channelName, viewStreamMinimumHeight);
 
-            window.Closed += delegate(object windowClosedSender, EventArgs windowClosedArgs)
+            viewStreamWindow.Closed += delegate(object windowClosedSender, EventArgs windowClosedArgs)
             {
                 showHideStreamFeed(true);
                 btnShowHideViewStream.IsEnabled = true;
@@ -539,7 +519,7 @@ namespace LivestreamBuddyNew.Controls
             btnShowHideViewStream.IsEnabled = false;
             btnPopoutViewStream.IsEnabled = false;
             showHideStreamFeed(false);
-            window.Show();
+            viewStreamWindow.Show();
         }
 
         private void RunCommercial(object sender, RoutedEventArgs e)

@@ -14,6 +14,8 @@ namespace LivestreamBuddyNew
             ShowStreamFeedWhenOpening = true;
             ShowTimestampsInChat = false;
             EnableDebugLogging = false;
+            ChatTextSize = 14;
+            ShowEmoticonsInChat = true;
         }
 
         public bool OpenStreamsInNewTab { get; set; }
@@ -23,5 +25,9 @@ namespace LivestreamBuddyNew
         public bool ShowTimestampsInChat { get; set; }
 
         public bool EnableDebugLogging { get; set; }
+
+        public int ChatTextSize { get; set; }
+
+        public bool ShowEmoticonsInChat { get; set; }
     }
 }

@@ -29,6 +29,8 @@ namespace LivestreamBuddyNew.Controls
             chkStreamViewShow.IsChecked = this.UserOptions.ShowStreamFeedWhenOpening;
             chkStreamShowChatTimestamps.IsChecked = this.UserOptions.ShowTimestampsInChat;
             chkEnableDebugLogging.IsChecked = this.UserOptions.EnableDebugLogging;
+            txtChatTextSize.Text = this.UserOptions.ChatTextSize.ToString();
+            chkShowEmoticonsInChat.IsChecked = this.UserOptions.ShowEmoticonsInChat;
         }
 
         # region Public Members
@@ -41,13 +43,34 @@ namespace LivestreamBuddyNew.Controls
 
         private void ButtonSaveClick(object sender, RoutedEventArgs e)
         {
+            string isValid = string.Empty;
+
             this.UserOptions.OpenStreamsInNewTab = chkStreamOpenStyle.IsChecked.Value;
             this.UserOptions.ShowStreamFeedWhenOpening = chkStreamViewShow.IsChecked.Value;
             this.UserOptions.ShowTimestampsInChat = chkStreamShowChatTimestamps.IsChecked.Value;
             this.UserOptions.EnableDebugLogging = chkEnableDebugLogging.IsChecked.Value;
 
-            DataFileManager.SetOptions(this.UserOptions);
-            DoOnSaved();
+            int chatTextSize;
+            if (int.TryParse(txtChatTextSize.Text, out chatTextSize))
+            {
+                this.UserOptions.ChatTextSize = chatTextSize;
+            }
+            else
+            {
+                isValid += "You must use real numbers for the 'Chat text size' field." + Environment.NewLine;
+            }
+
+            this.UserOptions.ShowEmoticonsInChat = chkShowEmoticonsInChat.IsChecked.Value;
+
+            if (string.IsNullOrEmpty(isValid))
+            {
+                DataFileManager.SetOptions(this.UserOptions);
+                DoOnSaved();
+            }
+            else
+            {
+                MessageBox.Show(isValid);
+            }
         }
 
         # endregion

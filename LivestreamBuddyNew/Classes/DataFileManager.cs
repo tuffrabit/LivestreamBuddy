@@ -260,7 +260,7 @@ namespace LivestreamBuddyNew
 
                     foreach (Emoticon emoticon in chatManager.GetEmoticons())
                     {
-                        writer.WriteLine(emoticon.Regex + "," + emoticon.Url);
+                        writer.WriteLine(emoticon.Pattern + "," + emoticon.Url);
                     }
                 }
             }
@@ -272,7 +272,7 @@ namespace LivestreamBuddyNew
                 {
                     string[] parts = line.Split(',');
 
-                    emoticons.Add(new Emoticon { Regex = new Regex(parts[0].Trim(), RegexOptions.Compiled), Url = parts[1].Trim() });
+                    emoticons.Add(new Emoticon { Pattern = parts[0].Trim(), Url = parts[1].Trim() });
                 }
             }
 
@@ -292,37 +292,57 @@ namespace LivestreamBuddyNew
                     while ((line = reader.ReadLine()) != null)
                     {
                         string[] values = line.Split(' ');
-                        bool temp;
+                        bool bTemp;
+                        int iTemp;
 
                         if (values.Length >= 2)
                         {
                             switch (values[0].ToLower())
                             {
                                 case "openstreamsinnewtab":
-                                    if (bool.TryParse(values[1], out temp))
+                                    if (bool.TryParse(values[1], out bTemp))
                                     {
-                                        options.OpenStreamsInNewTab = temp;
+                                        options.OpenStreamsInNewTab = bTemp;
                                     }
 
                                     break;
                                 case "showstreamfeedwhenopening":
-                                    if (bool.TryParse(values[1], out temp))
+                                    if (bool.TryParse(values[1], out bTemp))
                                     {
-                                        options.ShowStreamFeedWhenOpening = temp;
+                                        options.ShowStreamFeedWhenOpening = bTemp;
                                     }
 
                                     break;
                                 case "showtimestampsinchat":
-                                    if (bool.TryParse(values[1], out temp))
+                                    if (bool.TryParse(values[1], out bTemp))
                                     {
-                                        options.ShowTimestampsInChat = temp;
+                                        options.ShowTimestampsInChat = bTemp;
                                     }
 
                                     break;
                                 case "enabledebuglogging":
-                                    if (bool.TryParse(values[1], out temp))
+                                    if (bool.TryParse(values[1], out bTemp))
                                     {
-                                        options.EnableDebugLogging = temp;
+                                        options.EnableDebugLogging = bTemp;
+                                    }
+
+                                    break;
+                                case "chattextsize":
+                                    if (int.TryParse(values[1], out iTemp))
+                                    {
+                                        if (iTemp < 1)
+                                        {
+                                            iTemp = 14;
+                                        }
+
+                                        options.ChatTextSize = iTemp;
+                                    }
+
+                                    break;
+                                case "showemoticonsinchat":
+                                    if (bool.TryParse(values[1], out bTemp))
+                                    {
+                                        options.ShowEmoticonsInChat = bTemp;
                                     }
 
                                     break;
@@ -345,6 +365,8 @@ namespace LivestreamBuddyNew
                     writer.WriteLine("ShowStreamFeedWhenOpening " + (options.ShowStreamFeedWhenOpening ? "true" : "false"));
                     writer.WriteLine("ShowTimestampsInChat " + (options.ShowTimestampsInChat ? "true" : "false"));
                     writer.WriteLine("EnableDebugLogging " + (options.EnableDebugLogging ? "true" : "false"));
+                    writer.WriteLine("ChatTextSize " + options.ChatTextSize.ToString());
+                    writer.WriteLine("ShowEmoticonsInChat " + (options.ShowEmoticonsInChat ? "true" : "false"));
                 }
             }
         }
