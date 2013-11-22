@@ -12,6 +12,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Awesomium.Core;
+using Awesomium.Windows.Controls;
 
 namespace LivestreamBuddyNew.Controls
 {
@@ -26,6 +27,8 @@ namespace LivestreamBuddyNew.Controls
 
             webViewStream.SizeChanged += webViewStream_SizeChanged;
             webViewStream.NativeViewInitialized += webViewStream_NativeViewInitialized;
+
+            this.IsShowing = false;
         }
 
         public ViewStream(string channelName, bool isWindow, double minimumHeight, bool show = true)
@@ -54,6 +57,12 @@ namespace LivestreamBuddyNew.Controls
 
         # endregion
 
+        # region Public Members
+
+        public bool IsShowing { get; set; }
+
+        # endregion
+
         # region Private Methods
 
         private void loadHTML()
@@ -69,6 +78,7 @@ namespace LivestreamBuddyNew.Controls
 
             if (this.showOnLoad)
             {
+                this.IsShowing = true;
                 webViewStream.LoadHTML("<html><head><script>function resizePlayer(width, height){var player=document.getElementById('live_embed_player_flash');if (width==-1){width=window.innerWidth - 16;}if (height==-1){height=window.innerHeight - 16;}player.style.width=width + 'px';player.style.maxWidth=width + 'px';player.style.height=height + 'px';player.style.maxHeight=height + 'px';}</script></head><body><object type='application/x-shockwave-flash' height='271' width='456' id='live_embed_player_flash' data='http://www.twitch.tv/widgets/live_embed_player.swf?channel=" + this.channelName + "' bgcolor='#000000'><param name='allowFullScreen' value='" + allowFullscreen + "'/><param name='allowScriptAccess' value='always'/><param name='allowNetworking' value='all'/><param name='movie' value='http://www.twitch.tv/widgets/live_embed_player.swf'/><param name='flashvars' value='hostname=www.twitch.tv&channel=" + this.channelName + "&auto_play=true&start_volume=25'/></object></body></html>");
             }
             else
@@ -97,6 +107,7 @@ namespace LivestreamBuddyNew.Controls
 
         public void Hide()
         {
+            this.IsShowing = false;
             webViewStream.LoadHTML("<html><head></head><body></body></html>");
         }
 

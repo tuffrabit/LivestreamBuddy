@@ -16,6 +16,7 @@ namespace LivestreamBuddyNew
             EnableDebugLogging = false;
             ChatTextSize = 14;
             ShowEmoticonsInChat = true;
+            LogAllIRCTraffic = false;
         }
 
         public bool OpenStreamsInNewTab { get; set; }
@@ -29,5 +30,7 @@ namespace LivestreamBuddyNew
         public int ChatTextSize { get; set; }
 
         public bool ShowEmoticonsInChat { get; set; }
+
+        public bool LogAllIRCTraffic { get; set; }
     }
 }

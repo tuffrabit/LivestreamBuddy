@@ -50,6 +50,9 @@ namespace LobsterKnifeFight
     {
         ThirtySeconds,
         SixtySeconds,
-        NinetySeconds
+        NinetySeconds, 
+        OneTwentySeconds, 
+        OneFiftySeconds, 
+        OneEightySeconds
     }
 }

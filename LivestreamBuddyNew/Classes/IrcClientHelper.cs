@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -19,6 +20,7 @@ namespace LivestreamBuddyNew
         private Thread workerThread;
         private volatile bool shouldStop;
         private Options options;
+        private StreamWriter trafficWriter;
 
         # endregion
 
@@ -38,6 +40,7 @@ namespace LivestreamBuddyNew
 
             this.workerThread = null;
             this.shouldStop = false;
+            this.trafficWriter = null;
             this.options = DataFileManager.GetOptions();
         }
 
@@ -67,6 +70,21 @@ namespace LivestreamBuddyNew
                 this.channelName = channelName;
                 this.username = username;
                 this.accessToken = accessToken;
+
+                if (this.options.LogAllIRCTraffic)
+                {
+                    DateTime now = DateTime.Now;
+
+                    this.trafficWriter = File.CreateText(string.Format("{0}_{1}{2}{3}.txt",
+                        this.channelName,
+                        now.Year.ToString(),
+                        now.Month.ToString(),
+                        now.Day.ToString()));
+
+                    this.trafficWriter.AutoFlush = true;
+                    client.OnRawMessage += client_OnRawMessage;
+                }
+
                 this.client.Connect("irc.twitch.tv", 6667);
             }
             else
@@ -96,6 +114,12 @@ namespace LivestreamBuddyNew
                 if (this.client.IsConnected)
                 {
                     this.client.Disconnect();
+                }
+
+                if (trafficWriter != null)
+                {
+                    trafficWriter.Close();
+                    trafficWriter.Dispose();
                 }
             }
         }
@@ -273,6 +297,14 @@ namespace LivestreamBuddyNew
             }
 
             DoDisconnected();
+        }
+
+        void client_OnRawMessage(object sender, IrcEventArgs e)
+        {
+            if (trafficWriter != null)
+            {
+                trafficWriter.WriteLine(e.Data.RawMessage);
+            }
         }
 
         # endregion

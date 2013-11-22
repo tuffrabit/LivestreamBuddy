@@ -4,27 +4,56 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              mc:Ignorable="d" 
-             d:DesignHeight="300" d:DesignWidth="300">
+             d:DesignHeight="600" d:DesignWidth="350">
     <Border Padding="3 3 3 3">
             <TabControl>
                 <TabItem Header="Chat / View">
-                <DockPanel Name="pnlMainDock" LastChildFill="True" SizeChanged="pnlMainDock_SizeChanged">
-                    <TextBox Name="txtMessage" DockPanel.Dock="Bottom" Margin="0 7 0 0" KeyDown="txtMessage_KeyDown" />
-                    <DockPanel Name="pnlViewStream" DockPanel.Dock="Top" />
-                    <StackPanel Orientation="Horizontal" DockPanel.Dock="Top" Margin="0 0 0 7" HorizontalAlignment="Center">
-                        <Button Name="btnShowHideViewStream" Margin="0 0 7 0" Width="150" Click="btnShowHideViewStream_Click" />
-                        <Button Name="btnPopoutViewStream" Width="150" Click="btnPopoutViewStream_Click">Popout</Button>
-                    </StackPanel>
-                    <DockPanel DockPanel.Dock="Right" Margin="7 0 0 0" LastChildFill="True">
-                        <StackPanel Orientation="Horizontal" DockPanel.Dock="Top" Margin="0 0 0 7">
-                            <TextBlock Margin="0 0 7 0">Viewers:</TextBlock>
-                            <TextBlock Name="lblViewerCount"></TextBlock>
+                <Grid Name="pnlMainDock">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Name="rowViewStream" Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                    <DockPanel Name="pnlTopContainer" Grid.Row="0" Grid.Column="0" SizeChanged="pnlMainDock_SizeChanged">
+                        <DockPanel Name="pnlViewStream" DockPanel.Dock="Top" />
+                        <StackPanel Orientation="Horizontal" DockPanel.Dock="Top" Margin="0 0 0 7" HorizontalAlignment="Center" MaxHeight="25">
+                            <Button Name="btnShowHideViewStream" Margin="0 0 7 0" Width="150" Click="btnShowHideViewStream_Click" />
+                            <Button Name="btnPopoutViewStream" Width="150" Click="btnPopoutViewStream_Click">Popout</Button>
                         </StackPanel>
-                        <ListBox Name="lstViewers" Width="115" ItemsSource="{Binding Viewers}"></ListBox>
                     </DockPanel>
-                    <my:WebControl Name="webChat" />
-                </DockPanel>
-            </TabItem>
+                    <GridSplitter Name="topSplitter" Grid.Row="1" Grid.Column="0" Height="5" Background="#FFBCBCBC" ResizeDirection="Rows" ResizeBehavior="PreviousAndNext" HorizontalAlignment="Stretch" VerticalAlignment="Center" />
+                    <DockPanel Grid.Row="2" Grid.Column="0">
+                        <DockPanel DockPanel.Dock="Right" Margin="7 0 0 0" LastChildFill="True">
+                            <StackPanel Orientation="Horizontal" DockPanel.Dock="Top" Margin="0 0 0 7">
+                                <TextBlock Margin="0 0 7 0">Viewers:</TextBlock>
+                                <TextBlock Name="lblViewerCount"></TextBlock>
+                            </StackPanel>
+                            <ListBox Name="lstViewers" Width="115" ItemsSource="{Binding Viewers}">
+                                <ListBox.ContextMenu>
+                                    <ContextMenu>
+                                        <MenuItem Header="Timeout" Click="Timeout_Click" />
+                                        <MenuItem Header="Ban" Click="Ban_Click" />
+                                        <MenuItem Header="Unban" Click="Unban_Click" />
+                                        <MenuItem Header="Slow" Click="Slow_Click" />
+                                        <MenuItem Header="Slow Off" Click="SlowOff_Click" />
+                                        <MenuItem Header="Mod" Click="Mod_Click" />
+                                        <MenuItem Header="Unmod" Click="Unmod_Click" />
+                                    </ContextMenu>
+                                </ListBox.ContextMenu>
+                            </ListBox>
+                        </DockPanel>
+                        <my:WebControl Name="webChat" />
+                    </DockPanel>
+                    <DockPanel Grid.Row="3" Grid.Column="0" Margin="0 7 0 0">
+                        <Button Width="75" DockPanel.Dock="Right" Click="chatClick">Chat</Button>
+                        <TextBox Name="txtMessage" Margin="0 0 7 0" DockPanel.Dock="Left" KeyDown="txtMessage_KeyDown" />
+                    </DockPanel>
+                </Grid>
+                </TabItem>
                 <TabItem Header="Manage">
                 <StackPanel Orientation="Vertical">
                     <Grid DockPanel.Dock="Top" Margin="0 0 0 7">
@@ -46,6 +75,9 @@
                             <ComboBoxItem>30 Seconds</ComboBoxItem>
                             <ComboBoxItem>60 Seconds</ComboBoxItem>
                             <ComboBoxItem>90 Seconds</ComboBoxItem>
+                            <ComboBoxItem>120 Seconds</ComboBoxItem>
+                            <ComboBoxItem>150 Seconds</ComboBoxItem>
+                            <ComboBoxItem>180 Seconds</ComboBoxItem>
                         </ComboBox>
                     </Grid>
                     <Button DockPanel.Dock="Top" Height="22" Click="UpdateStreamClick" Margin="0 0 0 7">Update</Button>

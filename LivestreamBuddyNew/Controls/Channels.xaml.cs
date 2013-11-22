@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -395,7 +396,8 @@ namespace LivestreamBuddyNew.Controls
             get { return game; }
             set
             {
-                game = value;
+                
+                game = HttpUtility.HtmlDecode(value);
                 RaisePropertyChanged("Game");
             }
         }

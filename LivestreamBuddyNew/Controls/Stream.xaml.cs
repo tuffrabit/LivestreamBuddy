@@ -72,7 +72,8 @@ namespace LivestreamBuddyNew.Controls
             {
                 pnlViewStream.Visibility = System.Windows.Visibility.Visible;
                 btnShowHideViewStream.Content = "Hide";
-                viewStream = new ViewStream(channelName, false, viewStreamMinimumHeight);
+                viewStream = new ViewStream(channelName, true, viewStreamMinimumHeight);
+                rowViewStream.MinHeight = 275;
             }
             else
             {
@@ -80,6 +81,8 @@ namespace LivestreamBuddyNew.Controls
                 btnShowHideViewStream.Content = "Show";
                 viewStream = new ViewStream(channelName, false, viewStreamMinimumHeight, false);
                 viewStreamPreviousHeight = viewStreamMinimumHeight;
+                topSplitter.IsEnabled = false;
+                rowViewStream.MinHeight = 32;
             }
 
             pnlViewStream.Children.Add(viewStream);
@@ -164,6 +167,49 @@ namespace LivestreamBuddyNew.Controls
         {
             if (!webChat.IsDisposed)
             {
+                List<UrlLocation> urlLocations = new List<UrlLocation>();
+
+                Match urlMatch = urlRegex.Match(message);
+                while (urlMatch != null && urlMatch.Success)
+                {
+                    int nextMatchStart = urlMatch.Index;
+                    bool isMatchInUrl = false;
+                    foreach (UrlLocation urlLocation in urlLocations)
+                    {
+                        if (urlMatch.Index > urlLocation.Start && urlMatch.Index < (urlLocation.Start + urlLocation.Length))
+                        {
+                            isMatchInUrl = true;
+                            break;
+                        }
+                    }
+
+                    if (!isMatchInUrl)
+                    {
+                        string before = message.Substring(0, urlMatch.Index);
+                        string after = message.Substring(urlMatch.Index + urlMatch.Length);
+                        string anchor = "<a href=\"javascript:void(0)\" onclick=\"linkClick('" + urlMatch.Value + "');\">" + urlMatch.Value + "</a>";
+
+                        urlLocations.Add(new UrlLocation { Start = urlMatch.Index, Length = anchor.Length });
+                        message = before + anchor + after;
+                        nextMatchStart += anchor.Length;
+                    }
+                    else
+                    {
+                        nextMatchStart += urlMatch.Length;
+                    }
+
+                    urlMatch = urlRegex.Match(message, nextMatchStart);
+                }
+
+                if (urlLocations.Count > 0)
+                {
+                    webChat.ExecuteJavascript("urlLocations = " + JsonConvert.SerializeObject(urlLocations) + ";");
+                }
+                else
+                {
+                    webChat.ExecuteJavascript("urlLocations = [];");
+                }
+
                 string timestamp = string.Empty;
 
                 if (this.options.ShowTimestampsInChat)
@@ -176,32 +222,55 @@ namespace LivestreamBuddyNew.Controls
             }
         }
 
-        private void showHideStreamFeed(bool show)
+        private void showHideStreamFeed(bool show, bool killOrReloadStream = true)
         {
             if (!show)
             {
                 viewStreamPreviousHeight = pnlViewStream.ActualHeight;
                 pnlViewStream.Visibility = System.Windows.Visibility.Collapsed;
-                viewStream.Hide();
+
+                if (killOrReloadStream)
+                {
+                    viewStream.Hide();
+                }
+
                 btnShowHideViewStream.Content = "Show";
+                rowViewStream.MinHeight = 32;
+                rowViewStream.MaxHeight = 32;
+                topSplitter.IsEnabled = false;
             }
             else
             {
                 pnlViewStream.Visibility = System.Windows.Visibility.Visible;
-                viewStream.Show();
+
+                if (killOrReloadStream)
+                {
+                    viewStream.Show();
+                }
 
                 if (viewStreamPreviousHeight == 0)
                 {
                     viewStreamPreviousHeight = pnlMainDock.ActualHeight * .469;
                 }
-                else if (viewStreamPreviousHeight < viewStreamMinimumHeight)
+                
+                if (viewStreamPreviousHeight < viewStreamMinimumHeight)
                 {
                     viewStreamPreviousHeight = viewStreamMinimumHeight;
                 }
 
                 pnlViewStream.Height = viewStreamPreviousHeight;
                 btnShowHideViewStream.Content = "Hide";
+                topSplitter.IsEnabled = true;
+                rowViewStream.MinHeight = 275;
+                rowViewStream.MaxHeight = double.PositiveInfinity;
             }
+        }
+
+        private void sendMessage()
+        {
+            client.SendMessage(txtMessage.Text);
+            writeChatLine(this.user.Name, txtMessage.Text, "#000000");
+            txtMessage.Clear();
         }
 
         # endregion
@@ -386,9 +455,15 @@ namespace LivestreamBuddyNew.Controls
         {
             if (client != null && e.Key == Key.Enter)
             {
-                client.SendMessage(txtMessage.Text);
-                writeChatLine(this.user.Name, txtMessage.Text, "#000000");
-                txtMessage.Clear();
+                sendMessage();
+            }
+        }
+
+        private void chatClick(object sender, RoutedEventArgs e)
+        {
+            if (client != null)
+            {
+                sendMessage();
             }
         }
 
@@ -485,9 +560,14 @@ namespace LivestreamBuddyNew.Controls
 
         private void pnlMainDock_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            if (e.PreviousSize.Height > 0)
+            if (e.NewSize.Height < viewStreamMinimumHeight)
             {
-                double newHeight = e.NewSize.Height * .469;
+                e.Handled = true;
+            }
+            else if (e.PreviousSize.Height > 0)
+            {
+                //double newHeight = e.NewSize.Height * .469;
+                double newHeight = e.NewSize.Height * .9;
 
                 if (newHeight >= viewStreamMinimumHeight)
                 {
@@ -507,18 +587,25 @@ namespace LivestreamBuddyNew.Controls
 
         private void btnPopoutViewStream_Click(object sender, RoutedEventArgs e)
         {
-            viewStreamWindow = new ViewStreamWindow(this.channelName, viewStreamMinimumHeight);
+            if (!this.viewStream.IsShowing)
+            {
+                this.viewStream.Show();
+            }
+
+            pnlViewStream.Children.Remove(this.viewStream);
+            viewStreamWindow = new ViewStreamWindow(this.viewStream, this.channelName, viewStreamMinimumHeight);
 
             viewStreamWindow.Closed += delegate(object windowClosedSender, EventArgs windowClosedArgs)
             {
-                showHideStreamFeed(true);
+                pnlViewStream.Children.Add(viewStreamWindow.ViewStream);
+                showHideStreamFeed(true, false);
                 btnShowHideViewStream.IsEnabled = true;
                 btnPopoutViewStream.IsEnabled = true;
             };
 
             btnShowHideViewStream.IsEnabled = false;
             btnPopoutViewStream.IsEnabled = false;
-            showHideStreamFeed(false);
+            showHideStreamFeed(false, false);
             viewStreamWindow.Show();
         }
 
@@ -532,30 +619,31 @@ namespace LivestreamBuddyNew.Controls
                 {
                     ChannelManager channelManager = new ChannelManager();
 
-                    try
-                    {
-                        CommercialLength length = CommercialLength.SixtySeconds;
+                    string length = "30";
 
-                        switch (cmbCommercialLength.SelectedIndex)
-                        {
-                            case 0:
-                                length = CommercialLength.ThirtySeconds;
-                                break;
-                            case 1:
-                                length = CommercialLength.SixtySeconds;
-                                break;
-                            case 2:
-                                length = CommercialLength.NinetySeconds;
-                                break;
-                        }
-
-                        channelManager.RunCommercial(user, this.channelName, length);
-                        MessageBox.Show("Running commercial.");
-                    }
-                    catch
+                    switch (cmbCommercialLength.SelectedIndex)
                     {
-                        MessageBox.Show("Commercial run failed.");
+                        case 0:
+                            length = "30";
+                            break;
+                        case 1:
+                            length = "60";
+                            break;
+                        case 2:
+                            length = "90";
+                            break;
+                        case 3:
+                            length = "120";
+                            break;
+                        case 4:
+                            length = "150";
+                            break;
+                        case 5:
+                            length = "190";
+                            break;
                     }
+
+                    client.SendMessage("/commercial " + length);
                 }
                 else
                 {
@@ -567,6 +655,67 @@ namespace LivestreamBuddyNew.Controls
                 Utility.ClearUserData(this.user);
 
                 MessageBox.Show("Something went wrong. Try again.");
+            }
+        }
+
+        private void Timeout_Click(object sender, RoutedEventArgs e)
+        {
+            if (lstViewers.SelectedItem != null)
+            {
+                client.SendMessage("/timeout " + (string)lstViewers.SelectedItem);
+            }
+        }
+
+        private void Ban_Click(object sender, RoutedEventArgs e)
+        {
+            if (lstViewers.SelectedItem != null)
+            {
+                client.SendMessage("/ban " + (string)lstViewers.SelectedItem);
+            }
+        }
+
+        private void Unban_Click(object sender, RoutedEventArgs e)
+        {
+            if (lstViewers.SelectedItem != null)
+            {
+                client.SendMessage("/unban " + (string)lstViewers.SelectedItem);
+            }
+        }
+
+        private void Slow_Click(object sender, RoutedEventArgs e)
+        {
+            SingleTextBoxWindow window = new SingleTextBoxWindow("Set Chat Limit Interval", "Seconds: ", "Set");
+
+            window.Owner = Application.Current.MainWindow;
+
+            if ((bool)window.ShowDialog())
+            {
+                int interval;
+                if (int.TryParse(window.Value, out interval))
+                {
+                    client.SendMessage("/slow " + interval.ToString());
+                }
+            }
+        }
+
+        private void SlowOff_Click(object sender, RoutedEventArgs e)
+        {
+            client.SendMessage("/slowoff");
+        }
+
+        private void Mod_Click(object sender, RoutedEventArgs e)
+        {
+            if (lstViewers.SelectedItem != null)
+            {
+                client.SendMessage("/mod " + (string)lstViewers.SelectedItem);
+            }
+        }
+
+        private void Unmod_Click(object sender, RoutedEventArgs e)
+        {
+            if (lstViewers.SelectedItem != null)
+            {
+                client.SendMessage("/unmod " + (string)lstViewers.SelectedItem);
             }
         }
 
@@ -618,18 +767,9 @@ namespace LivestreamBuddyNew.Controls
         }
     }
 
-    public class EmoticonMatch
+    public class UrlLocation
     {
-        public Match Match { get; set; }
-
-        public string Replacement { get; set; }
-
-        public EmoticonMatch() { }
-
-        public EmoticonMatch(Match match, string replacement)
-        {
-            this.Match = match;
-            this.Replacement = replacement;
-        }
+        public int Start { get; set; }
+        public int Length { get; set; }
     }
 }

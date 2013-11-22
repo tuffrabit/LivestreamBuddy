@@ -1,14 +1,22 @@
 ﻿Alan Wake
 Alan Wake's American Nightmare
+Assassin's Creed
+Assassin's Creed: Brotherhood
+Assassin's Creed: Revelations
+Assassin's Creed II
+Assassin's Creed III
+Assassin's Creed IV: Black Flag
 Battlefield: Bad Company
 Battlefield: Bad Company 2
 Battlefield 3
+Battlefield 4
 Call of Duty 4: Modern Warfare
 Call of Duty: World at War
 Call of Duty: Modern Warfare 2
 Call of Duty: Black Ops
 Call of Duty: Modern Warfare 3
 Call of Duty: Black Ops II
+Call of Duty: Ghosts
 Counter-Strike: Global Offensive
 Counter-Strike: Source
 Crysis

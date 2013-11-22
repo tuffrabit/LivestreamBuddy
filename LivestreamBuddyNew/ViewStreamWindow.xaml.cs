@@ -28,8 +28,8 @@ namespace LivestreamBuddyNew
             : this()
         {
             this.Title = "View stream - " + channelName;
-            this.viewStream = new ViewStream(channelName, true, minimumHeight);
-            container.Child = this.viewStream;
+            this.ViewStream = new ViewStream(channelName, true, minimumHeight);
+            container.Child = this.ViewStream;
 
             minimumHeight += 40;
             double width = minimumHeight * 1.48;
@@ -40,9 +40,29 @@ namespace LivestreamBuddyNew
             this.MinHeight = minimumHeight;
         }
 
-        # region Private Members
+        public ViewStreamWindow(ViewStream viewStream, string channelName, double minimumHeight)
+            : this()
+        {
+            this.Title = "View stream - " + channelName;
+            this.ViewStream = viewStream;
+            container.Child = this.ViewStream;
 
-        ViewStream viewStream;
+            minimumHeight += 40;
+            double width = minimumHeight * 1.48;
+
+            this.Width = width;
+            this.Width = width;
+            this.Height = minimumHeight;
+            this.MinHeight = minimumHeight;
+        }
+
+        # region Public Members
+
+        public ViewStream ViewStream;
+
+        # endregion
+
+        # region Private Members
 
         # endregion
 
@@ -50,7 +70,7 @@ namespace LivestreamBuddyNew
 
         private void Window_Closed_1(object sender, EventArgs e)
         {
-            this.viewStream.Shutdown();
+            container.Child = null;
         }
 
         # endregion

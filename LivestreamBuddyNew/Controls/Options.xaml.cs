@@ -31,6 +31,7 @@ namespace LivestreamBuddyNew.Controls
             chkEnableDebugLogging.IsChecked = this.UserOptions.EnableDebugLogging;
             txtChatTextSize.Text = this.UserOptions.ChatTextSize.ToString();
             chkShowEmoticonsInChat.IsChecked = this.UserOptions.ShowEmoticonsInChat;
+            chkLogAllIRCTraffic.IsChecked = this.UserOptions.LogAllIRCTraffic;
         }
 
         # region Public Members
@@ -49,6 +50,7 @@ namespace LivestreamBuddyNew.Controls
             this.UserOptions.ShowStreamFeedWhenOpening = chkStreamViewShow.IsChecked.Value;
             this.UserOptions.ShowTimestampsInChat = chkStreamShowChatTimestamps.IsChecked.Value;
             this.UserOptions.EnableDebugLogging = chkEnableDebugLogging.IsChecked.Value;
+            this.UserOptions.LogAllIRCTraffic = chkLogAllIRCTraffic.IsChecked.Value;
 
             int chatTextSize;
             if (int.TryParse(txtChatTextSize.Text, out chatTextSize))

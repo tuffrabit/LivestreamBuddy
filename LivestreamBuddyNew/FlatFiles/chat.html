@@ -18,7 +18,7 @@
 			}
 		</style>
 		<script>
-		    var urlPattern = /[-a-zA-Z0-9@:%_\+.~#?&//=]{2,256}\.[a-z]{2,4}\b(\/[-a-zA-Z0-9@:%_\+.~#?&//=]*)?/gi;
+		    var urlLocations = [];
 
 		    function resizeMessagesPanel(width, height) {
 		        var pnlMessages = document.getElementById('pnlMessages');
@@ -108,37 +108,16 @@
 		        var newChatLine = document.createElement('div');
 		        var nameField = document.createElement('span');
 		        var messageField = document.createElement('span');
-		        var urlLocations = [];
 
 		        nameField.setAttribute('style', 'color:' + color + ';font-weight:bold;');
 		        nameField.innerHTML = "<span style=\"cursor:pointer\" onclick=\"linkClick('http://twitch.tv/" + username + "');\">" + timestamp + username + ":</span> ";
-
-		        var urlMatch = urlPattern.exec(message);
-		        while (urlMatch != null && urlMatch.length > 0 && urlMatch[0] != null) {
-		            var matchIndex = urlPattern.lastIndex - urlMatch[0].length;
-		            var isMatchInURL = isInLocation(matchIndex, urlLocations);
-
-		            if (!isMatchInURL) {
-		                var before = message.substr(0, matchIndex);
-		                var after = message.substr(matchIndex + urlMatch[0].length);
-		                var anchor = "<a href=\"javascript:void(0)\" onclick=\"linkClick('" + urlMatch[0] + "');\">" + urlMatch[0] + "</a>";
-		                var urlLocation = {};
-
-		                urlLocation.Start = matchIndex;
-		                urlLocation.Length = anchor.length;
-		                urlLocations.push(urlLocation);
-		                message = before + anchor + after;
-		            }
-
-		            urlMatch = urlPattern.exec(message);
-		        }
 
 		        if (emoticons != null && emoticons.length > 0) {
 		            var emoticonPattern;
 
 		            for (var i = 0; i < emoticons.length; i++) {
 		                var emoticon = emoticons[i];
-		                emoticonPattern = new RegExp(emoticon.Pattern, "gi");
+		                emoticonPattern = new RegExp("\\b" + emoticon.Pattern + "\\b", "gi");
 
 		                while (emoticonPattern.test(message) == true) {
 		                    var matchIndex = emoticonPattern.lastIndex - emoticon.Pattern.length;

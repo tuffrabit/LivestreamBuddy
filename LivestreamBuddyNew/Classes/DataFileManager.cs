@@ -346,6 +346,13 @@ namespace LivestreamBuddyNew
                                     }
 
                                     break;
+                                case "logallirctraffic":
+                                    if (bool.TryParse(values[1], out bTemp))
+                                    {
+                                        options.LogAllIRCTraffic = bTemp;
+                                    }
+
+                                    break;
                             }
                         }
                     }
@@ -367,6 +374,7 @@ namespace LivestreamBuddyNew
                     writer.WriteLine("EnableDebugLogging " + (options.EnableDebugLogging ? "true" : "false"));
                     writer.WriteLine("ChatTextSize " + options.ChatTextSize.ToString());
                     writer.WriteLine("ShowEmoticonsInChat " + (options.ShowEmoticonsInChat ? "true" : "false"));
+                    writer.WriteLine("LogAllIRCTraffic " + (options.LogAllIRCTraffic ? "true" : "false"));
                 }
             }
         }
