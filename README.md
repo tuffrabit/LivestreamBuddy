@@ -1,5 +1,5 @@
 LivestreamBuddy version 1.0
-https://sourceforge.net/projects/livestreambuddy/
+https://github.com/tuffrabit/LivestreamBuddy
 
 Changes:
 - Complete UI redesign
